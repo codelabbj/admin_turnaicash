@@ -47,15 +47,15 @@ export default function DepositsPage() {
                         <div className="text-2xl font-bold">{caisse.solde} FCFA</div>
                         <p className="text-xs text-muted-foreground mt-1">
                           {caisse.updated_at
-                            ? `Updated ${new Date(caisse.updated_at).toLocaleDateString()}`
-                            : "No updates"}
+                            ? `Mis à jour le ${new Date(caisse.updated_at).toLocaleDateString()}`
+                            : "Aucune mise à jour"}
                         </p>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">No caisses found</div>
+                <div className="text-center py-8 text-muted-foreground">Aucune caisse trouvée</div>
               )}
             </CardContent>
           </Card>
@@ -64,8 +64,8 @@ export default function DepositsPage() {
         <TabsContent value="deposits" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Deposits List</CardTitle>
-              <CardDescription>Total: {depositsData?.count || 0} deposits</CardDescription>
+              <CardTitle>Liste des Dépôts</CardTitle>
+              <CardDescription>Total : {depositsData?.count || 0} dépôts</CardDescription>
             </CardHeader>
             <CardContent>
               {depositsLoading ? (
@@ -76,10 +76,10 @@ export default function DepositsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Platform</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Created At</TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Plateforme</TableHead>
+                  <TableHead>Montant</TableHead>
+                  <TableHead>Créé le</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -98,7 +98,7 @@ export default function DepositsPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">No deposits found</div>
+                <div className="text-center py-8 text-muted-foreground">Aucun dépôt trouvé</div>
               )}
             </CardContent>
           </Card>

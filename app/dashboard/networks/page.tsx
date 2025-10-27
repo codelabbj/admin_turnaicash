@@ -69,8 +69,8 @@ export default function NetworksPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Networks List</CardTitle>
-          <CardDescription>Total: {networks?.length || 0} networks</CardDescription>
+          <CardTitle>Liste des Réseaux</CardTitle>
+          <CardDescription>Total : {networks?.length || 0} réseaux</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -81,12 +81,12 @@ export default function NetworksPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Public Name</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Deposit</TableHead>
-                  <TableHead>Withdrawal</TableHead>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Nom Public</TableHead>
+                  <TableHead>Pays</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Dépôt</TableHead>
+                  <TableHead>Retrait</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -102,17 +102,17 @@ export default function NetworksPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={network.enable ? "default" : "secondary"}>
-                        {network.enable ? "Active" : "Inactive"}
+                        {network.enable ? "Actif" : "Inactif"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={network.active_for_deposit ? "default" : "secondary"}>
-                        {network.active_for_deposit ? "Yes" : "No"}
+                        {network.active_for_deposit ? "Oui" : "Non"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={network.active_for_with ? "default" : "secondary"}>
-                        {network.active_for_with ? "Yes" : "No"}
+                        {network.active_for_with ? "Oui" : "Non"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -130,7 +130,7 @@ export default function NetworksPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No networks found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucun réseau trouvé</div>
           )}
         </CardContent>
       </Card>
@@ -140,21 +140,21 @@ export default function NetworksPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the network "{networkToDelete?.public_name}". This action cannot be undone.
+              Ceci supprimera définitivement le réseau "{networkToDelete?.public_name}". Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
               {deleteNetwork.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Suppression...
                 </>
               ) : (
-                "Delete"
+                "Supprimer"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

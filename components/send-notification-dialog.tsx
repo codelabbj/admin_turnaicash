@@ -50,13 +50,13 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Send Notification</DialogTitle>
-          <DialogDescription>Send a notification to a specific user</DialogDescription>
+          <DialogTitle>Envoyer une Notification</DialogTitle>
+          <DialogDescription>Envoyer une notification à un utilisateur spécifique</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="user_id">Select User *</Label>
+            <Label htmlFor="user_id">Sélectionner un Utilisateur *</Label>
             {isLoadingUsers ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -68,12 +68,12 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
                 disabled={sendNotification.isPending}
               >
                 <SelectTrigger id="user_id">
-                  <SelectValue placeholder="Choose a user..." />
+                  <SelectValue placeholder="Choisir un utilisateur..." />
                 </SelectTrigger>
                 <SelectContent>
                   {botUsers?.map((user) => (
                     <SelectItem key={user.id} value={user.telegram_user_id}>
-                      {user.first_name} {user.last_name} ({user.email || 'No email'})
+                      {user.first_name} {user.last_name} ({user.email || 'Aucun email'})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -82,24 +82,24 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">Titre *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Notification title"
+              placeholder="Titre de la notification"
               required
               disabled={sendNotification.isPending}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content *</Label>
+            <Label htmlFor="content">Contenu *</Label>
             <Textarea
               id="content"
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Notification content..."
+              placeholder="Contenu de la notification..."
               rows={4}
               required
               disabled={sendNotification.isPending}
@@ -113,16 +113,16 @@ export function SendNotificationDialog({ open, onOpenChange }: SendNotificationD
               onClick={() => onOpenChange(false)}
               disabled={sendNotification.isPending}
             >
-              Cancel
+              Annuler
             </Button>
             <Button type="submit" disabled={sendNotification.isPending}>
               {sendNotification.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
+                  Envoi...
                 </>
               ) : (
-                "Send Notification"
+                "Envoyer la Notification"
               )}
             </Button>
           </DialogFooter>

@@ -40,13 +40,13 @@ export default function PlatformsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Min Deposit</TableHead>
-                  <TableHead>Max Deposit</TableHead>
-                  <TableHead>Min Withdrawal</TableHead>
-                  <TableHead>Max Win</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Dépôt Min</TableHead>
+                  <TableHead>Dépôt Max</TableHead>
+                  <TableHead>Retrait Min</TableHead>
+                  <TableHead>Gain Max</TableHead>
+                  <TableHead>Localisation</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -55,7 +55,7 @@ export default function PlatformsPage() {
                     <TableCell className="font-medium">{platform.name}</TableCell>
                     <TableCell>
                       <Badge variant={platform.enable ? "default" : "secondary"}>
-                        {platform.enable ? "Active" : "Inactive"}
+                        {platform.enable ? "Actif" : "Inactif"}
                       </Badge>
                     </TableCell>
                     <TableCell>{platform.minimun_deposit} FCFA</TableCell>
@@ -70,7 +70,7 @@ export default function PlatformsPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No platforms found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucune plateforme trouvée</div>
           )}
         </CardContent>
       </Card>

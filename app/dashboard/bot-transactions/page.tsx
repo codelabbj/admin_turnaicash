@@ -55,7 +55,7 @@ export default function BotTransactionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Bot Transactions</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Transactions Bot</h2>
           <p className="text-muted-foreground">Gérez les dépôts et retraits des bots</p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
@@ -98,8 +98,8 @@ export default function BotTransactionsPage() {
                   <SelectItem value="all">Tous les Types</SelectItem>
                   <SelectItem value="deposit">Dépôt</SelectItem>
                   <SelectItem value="withdrawal">Retrait</SelectItem>
-                  <SelectItem value="disbursements">Disbursements</SelectItem>
-                  <SelectItem value="reward">Reward</SelectItem>
+                  <SelectItem value="disbursements">Décaissements</SelectItem>
+                  <SelectItem value="reward">Récompense</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -168,8 +168,8 @@ export default function BotTransactionsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Liste des Bot Transactions</CardTitle>
-          <CardDescription>Total : {transactionsData?.count || 0} bot transactions</CardDescription>
+          <CardTitle>Liste des Transactions Bot</CardTitle>
+          <CardDescription>Total : {transactionsData?.count || 0} transactions bot</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -247,7 +247,7 @@ export default function BotTransactionsPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">Aucune bot transaction trouvée</div>
+            <div className="text-center py-8 text-muted-foreground">Aucune transaction bot trouvée</div>
           )}
         </CardContent>
       </Card>

@@ -64,19 +64,19 @@ export default function TelephonesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Telephones</h2>
-          <p className="text-muted-foreground">Manage user phone numbers</p>
+          <h2 className="text-3xl font-bold tracking-tight">Téléphones</h2>
+          <p className="text-muted-foreground">Gérez les numéros de téléphone des utilisateurs</p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Telephone
+          Ajouter un Téléphone
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Telephones List</CardTitle>
-          <CardDescription>Total: {telephones?.length || 0} telephones</CardDescription>
+          <CardTitle>Liste des Téléphones</CardTitle>
+          <CardDescription>Total : {telephones?.length || 0} téléphones</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -88,10 +88,10 @@ export default function TelephonesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Phone Number</TableHead>
-                  <TableHead>Network</TableHead>
-                  <TableHead>Telegram User</TableHead>
-                  <TableHead>Created At</TableHead>
+                  <TableHead>Numéro de Téléphone</TableHead>
+                  <TableHead>Réseau</TableHead>
+                  <TableHead>Utilisateur Telegram</TableHead>
+                  <TableHead>Créé le</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -120,7 +120,7 @@ export default function TelephonesPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No telephones found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucun téléphone trouvé</div>
           )}
         </CardContent>
       </Card>
@@ -130,21 +130,21 @@ export default function TelephonesPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the telephone "{telephoneToDelete?.phone}". This action cannot be undone.
+              Ceci supprimera définitivement le téléphone "{telephoneToDelete?.phone}". Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
               {deleteTelephone.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Suppression...
                 </>
               ) : (
-                "Delete"
+                "Supprimer"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

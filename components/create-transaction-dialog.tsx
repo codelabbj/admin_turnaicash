@@ -109,21 +109,21 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create Transaction</DialogTitle>
-          <DialogDescription>Create a new deposit or withdrawal transaction</DialogDescription>
+          <DialogTitle>Créer une Transaction</DialogTitle>
+          <DialogDescription>Créer un nouveau dépôt ou retrait</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="deposit" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="deposit">Deposit</TabsTrigger>
-            <TabsTrigger value="withdrawal">Withdrawal</TabsTrigger>
+            <TabsTrigger value="deposit">Dépôt</TabsTrigger>
+            <TabsTrigger value="withdrawal">Retrait</TabsTrigger>
           </TabsList>
 
           <TabsContent value="deposit">
             <form onSubmit={handleDepositSubmit} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="deposit-amount">Amount *</Label>
+                  <Label htmlFor="deposit-amount">Montant *</Label>
                   <Input
                     id="deposit-amount"
                     type="number"
@@ -136,7 +136,7 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="deposit-phone">Phone Number *</Label>
+                  <Label htmlFor="deposit-phone">Numéro de Téléphone *</Label>
                   <Input
                     id="deposit-phone"
                     value={depositData.phone_number}
@@ -172,14 +172,14 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="deposit-network">Network *</Label>
+                  <Label htmlFor="deposit-network">Réseau *</Label>
                   <Select
                     value={depositData.network}
                     onValueChange={(value) => setDepositData({ ...depositData, network: value })}
                     disabled={createDeposit.isPending}
                   >
                     <SelectTrigger id="deposit-network">
-                      <SelectValue placeholder="Select network" />
+                      <SelectValue placeholder="Sélectionner un réseau" />
                     </SelectTrigger>
                     <SelectContent>
                       {networks?.map((network) => (
@@ -216,16 +216,16 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                   onClick={() => onOpenChange(false)}
                   disabled={createDeposit.isPending}
                 >
-                  Cancel
+                  Annuler
                 </Button>
                 <Button type="submit" disabled={createDeposit.isPending}>
                   {createDeposit.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      Création...
                     </>
                   ) : (
-                    "Create Deposit"
+                    "Créer le Dépôt"
                   )}
                 </Button>
               </DialogFooter>
@@ -236,7 +236,7 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
             <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="withdrawal-amount">Amount *</Label>
+                  <Label htmlFor="withdrawal-amount">Montant *</Label>
                   <Input
                     id="withdrawal-amount"
                     type="number"
@@ -249,7 +249,7 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="withdrawal-phone">Phone Number *</Label>
+                  <Label htmlFor="withdrawal-phone">Numéro de Téléphone *</Label>
                   <Input
                     id="withdrawal-phone"
                     value={withdrawalData.phone_number}
@@ -285,7 +285,7 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="withdrawal-code">Withdrawal Code *</Label>
+                  <Label htmlFor="withdrawal-code">Code de Retrait *</Label>
                   <Input
                     id="withdrawal-code"
                     value={withdrawalData.withdriwal_code}
@@ -304,7 +304,7 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
                     disabled={createWithdrawal.isPending}
                   >
                     <SelectTrigger id="withdrawal-network">
-                      <SelectValue placeholder="Select network" />
+                      <SelectValue placeholder="Sélectionner un réseau" />
                     </SelectTrigger>
                     <SelectContent>
                       {networks?.map((network) => (
@@ -335,24 +335,24 @@ export function CreateTransactionDialog({ open, onOpenChange }: CreateTransactio
               </div>
 
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={createWithdrawal.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createWithdrawal.isPending}>
-                  {createWithdrawal.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Withdrawal"
-                  )}
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    disabled={createWithdrawal.isPending}
+                  >
+                    Annuler
+                  </Button>
+                  <Button type="submit" disabled={createWithdrawal.isPending}>
+                    {createWithdrawal.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Création...
+                      </>
+                    ) : (
+                      "Créer le Retrait"
+                    )}
+                  </Button>
               </DialogFooter>
             </form>
           </TabsContent>

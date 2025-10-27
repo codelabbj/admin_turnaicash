@@ -30,18 +30,18 @@ export default function BotUsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Search and filter bot users</CardDescription>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les utilisateurs bot</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="search">Search</Label>
+              <Label htmlFor="search">Rechercher</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Search by name or email..."
+                  placeholder="Rechercher par nom ou email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-8"
@@ -49,15 +49,15 @@ export default function BotUsersPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">Statut</Label>
               <Select value={isBlock} onValueChange={setIsBlock}>
                 <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="blocked">Blocked</SelectItem>
+                  <SelectItem value="all">Tous les Utilisateurs</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="blocked">Bloqué</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -67,8 +67,8 @@ export default function BotUsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Users List</CardTitle>
-          <CardDescription>Total: {users?.length || 0} users</CardDescription>
+          <CardTitle>Liste des Utilisateurs</CardTitle>
+          <CardDescription>Total : {users?.length || 0} utilisateurs</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -80,10 +80,10 @@ export default function BotUsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Telegram ID</TableHead>
-                  <TableHead>Name</TableHead>
+                  <TableHead>ID Telegram</TableHead>
+                  <TableHead>Nom</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Created At</TableHead>
+                  <TableHead>Créé le</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -103,7 +103,7 @@ export default function BotUsersPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No users found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucun utilisateur trouvé</div>
           )}
         </CardContent>
       </Card>

@@ -48,28 +48,28 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Rewards & Bonuses</CardTitle>
-              <CardDescription>Bonus and reward configuration</CardDescription>
+              <CardTitle>Récompenses & Bonus</CardTitle>
+              <CardDescription>Configuration des bonus et récompenses</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Bonus Percent</span>
+                <span className="text-sm text-muted-foreground">Pourcentage de Bonus</span>
                 <Badge variant="outline">{settings.bonus_percent}%</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Deposit Reward Percent</span>
+                <span className="text-sm text-muted-foreground">Pourcentage de Récompense de Dépôt</span>
                 <Badge variant="outline">{settings.deposit_reward_percent}%</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Referral Bonus</span>
+                <span className="text-sm text-muted-foreground">Bonus de Parrainage</span>
                 <Badge variant={settings.referral_bonus ? "default" : "secondary"}>
-                  {settings.referral_bonus ? "Enabled" : "Disabled"}
+                  {settings.referral_bonus ? "Activé" : "Désactivé"}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Deposit Reward</span>
+                <span className="text-sm text-muted-foreground">Récompense de Dépôt</span>
                 <Badge variant={settings.deposit_reward ? "default" : "secondary"}>
-                  {settings.deposit_reward ? "Enabled" : "Disabled"}
+                  {settings.deposit_reward ? "Activé" : "Désactivé"}
                 </Badge>
               </div>
             </CardContent>
@@ -77,20 +77,20 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>App Version</CardTitle>
-              <CardDescription>Mobile application version information</CardDescription>
+              <CardTitle>Version de l'App</CardTitle>
+              <CardDescription>Informations sur la version de l'application mobile</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Minimum Version</span>
+                <span className="text-sm text-muted-foreground">Version Minimale</span>
                 <Badge variant="outline">{settings.min_version || "N/A"}</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Latest Version</span>
+                <span className="text-sm text-muted-foreground">Dernière Version</span>
                 <Badge variant="outline">{settings.last_version || "N/A"}</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Download Link</span>
+                <span className="text-sm text-muted-foreground">Lien de Téléchargement</span>
                 {settings.dowload_apk_link ? (
                   <a
                     href={settings.dowload_apk_link}
@@ -98,7 +98,7 @@ export default function SettingsPage() {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"
                   >
-                    View Link
+                    Voir le Lien
                   </a>
                 ) : (
                   <span className="text-sm text-muted-foreground">N/A</span>
@@ -109,16 +109,16 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Contact & Links</CardTitle>
-              <CardDescription>Support and payment links</CardDescription>
+              <CardTitle>Contact & Liens</CardTitle>
+              <CardDescription>Support et liens de paiement</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">WhatsApp Phone</span>
+                <span className="text-sm text-muted-foreground">Téléphone WhatsApp</span>
                 <Badge variant="outline">{settings.whatsapp_phone || "N/A"}</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Wave Link</span>
+                <span className="text-sm text-muted-foreground">Lien Wave</span>
                 {settings.wave_default_link ? (
                   <a
                     href={settings.wave_default_link}
@@ -126,14 +126,14 @@ export default function SettingsPage() {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"
                   >
-                    View
+                    Voir
                   </a>
                 ) : (
                   <span className="text-sm text-muted-foreground">N/A</span>
                 )}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Orange Link</span>
+                <span className="text-sm text-muted-foreground">Lien Orange</span>
                 {settings.orange_default_link ? (
                   <a
                     href={settings.orange_default_link}
@@ -141,14 +141,14 @@ export default function SettingsPage() {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"
                   >
-                    View
+                    Voir
                   </a>
                 ) : (
                   <span className="text-sm text-muted-foreground">N/A</span>
                 )}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">MTN Link</span>
+                <span className="text-sm text-muted-foreground">Lien MTN</span>
                 {settings.mtn_default_link ? (
                   <a
                     href={settings.mtn_default_link}
@@ -156,7 +156,7 @@ export default function SettingsPage() {
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"
                   >
-                    View
+                    Voir
                   </a>
                 ) : (
                   <span className="text-sm text-muted-foreground">N/A</span>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
           </Card>
         </div>
       ) : (
-        <div className="text-center py-8 text-muted-foreground">No settings found</div>
+        <div className="text-center py-8 text-muted-foreground">Aucun paramètre trouvé</div>
       )}
     </div>
   )

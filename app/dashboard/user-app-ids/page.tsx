@@ -58,19 +58,19 @@ export default function UserAppIdsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">User App IDs</h2>
-          <p className="text-muted-foreground">Manage user application identifiers</p>
+          <h2 className="text-3xl font-bold tracking-tight">IDs Utilisateur App</h2>
+          <p className="text-muted-foreground">Gérez les identifiants d'application utilisateur</p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add User App ID
+          Ajouter ID Utilisateur App
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>User App IDs List</CardTitle>
-          <CardDescription>Total: {userAppIds?.length || 0} user app IDs</CardDescription>
+          <CardTitle>Liste des IDs Utilisateur App</CardTitle>
+          <CardDescription>Total : {userAppIds?.length || 0} IDs utilisateur app</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -82,10 +82,10 @@ export default function UserAppIdsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>User App ID</TableHead>
-                  <TableHead>App Name</TableHead>
-                  <TableHead>Telegram User</TableHead>
-                  <TableHead>Created At</TableHead>
+                  <TableHead>ID Utilisateur App</TableHead>
+                  <TableHead>Nom de l'App</TableHead>
+                  <TableHead>Utilisateur Telegram</TableHead>
+                  <TableHead>Créé le</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -114,7 +114,7 @@ export default function UserAppIdsPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No user app IDs found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucun ID utilisateur app trouvé</div>
           )}
         </CardContent>
       </Card>
@@ -124,22 +124,21 @@ export default function UserAppIdsPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the user app ID "{userAppIdToDelete?.user_app_id}". This action cannot be
-              undone.
+              Ceci supprimera définitivement l'ID utilisateur app "{userAppIdToDelete?.user_app_id}". Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
               {deleteUserAppId.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Suppression...
                 </>
               ) : (
-                "Delete"
+                "Supprimer"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

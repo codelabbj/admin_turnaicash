@@ -66,7 +66,7 @@ export default function NotificationsPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No notifications found</div>
+            <div className="text-center py-8 text-muted-foreground">Aucune notification trouvée</div>
           )}
         </CardContent>
       </Card>
