@@ -1,18 +1,30 @@
 "use client"
 
+import { useState } from "react"
 import { useSettings } from "@/hooks/useSettings"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, Pencil } from "lucide-react"
+import { SettingsDialog } from "@/components/settings-dialog"
 
 export default function SettingsPage() {
   const { data: settings, isLoading } = useSettings()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Paramètres</h2>
-        <p className="text-muted-foreground">Consultez les paramètres de configuration de la plateforme</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Paramètres</h2>
+          <p className="text-muted-foreground">Consultez et modifiez les paramètres de configuration de la plateforme</p>
+        </div>
+        {settings && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Modifier
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -61,16 +73,22 @@ export default function SettingsPage() {
                 <Badge variant="outline">{settings.deposit_reward_percent}%</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Bonus de Parrainage</span>
-                <Badge variant={settings.referral_bonus ? "default" : "secondary"}>
-                  {settings.referral_bonus ? "Activé" : "Désactivé"}
-                </Badge>
+                <span className="text-sm text-muted-foreground">Bonus de Parrainage (referral_bonus)</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant={settings.referral_bonus ? "default" : "secondary"}>
+                    {settings.referral_bonus ? "Activé" : "Désactivé"}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">({String(settings.referral_bonus)})</span>
+                </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Récompense de Dépôt</span>
-                <Badge variant={settings.deposit_reward ? "default" : "secondary"}>
-                  {settings.deposit_reward ? "Activé" : "Désactivé"}
-                </Badge>
+                <span className="text-sm text-muted-foreground">Récompense de Dépôt (deposit_reward)</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant={settings.deposit_reward ? "default" : "secondary"}>
+                    {settings.deposit_reward ? "Activé" : "Désactivé"}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">({String(settings.deposit_reward)})</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -168,6 +186,8 @@ export default function SettingsPage() {
       ) : (
         <div className="text-center py-8 text-muted-foreground">Aucun paramètre trouvé</div>
       )}
+
+      {settings && <SettingsDialog open={dialogOpen} onOpenChange={setDialogOpen} settings={settings} />}
     </div>
   )
 }

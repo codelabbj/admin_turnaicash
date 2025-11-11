@@ -1,7 +1,8 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/lib/axios"
+import { toast } from "react-hot-toast"
 
 export interface Settings {
   id: number
@@ -22,12 +23,29 @@ export interface Settings {
   mtn_default_link: string | null
 }
 
+export type SettingsInput = Omit<Settings, "id">
+
 export function useSettings() {
   return useQuery({
     queryKey: ["settings"],
     queryFn: async () => {
       const res = await api.get<Settings>("/mobcash/setting")
       return res.data
+    },
+  })
+}
+
+export function useUpdateSettings() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: Partial<SettingsInput>) => {
+      const res = await api.patch<Settings>("/mobcash/setting", data)
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Settings updated successfully!")
+      queryClient.invalidateQueries({ queryKey: ["settings"] })
     },
   })
 }

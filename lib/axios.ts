@@ -28,7 +28,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       
-      const errorMessage = error.response?.data?.detail || error.response?.data?.error || ""
+      const errorMessage = error.response?.data?.details || error.response?.data?.detail || error.response?.data?.error || ""
       const isAuthenticationError = 
         errorMessage.includes("Authentication credentials were not provided") ||
         errorMessage.includes("Invalid token") ||
@@ -76,6 +76,7 @@ api.interceptors.response.use(
         : "An unexpected error occurred. Please try again."
 
     const backendMsg =
+      error.response?.data?.details ||
       error.response?.data?.detail ||
       error.response?.data?.error ||
       error.response?.data?.message ||
