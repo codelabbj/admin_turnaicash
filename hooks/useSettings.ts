@@ -40,7 +40,7 @@ export function useUpdateSettings() {
 
   return useMutation({
     mutationFn: async (data: Partial<SettingsInput>) => {
-      const res = await api.post<Settings>("/mobcash/setting", data)
+      const res = await api.put<Settings>("/mobcash/setting", data)
       return res.data
     },
     onSuccess: () => {
