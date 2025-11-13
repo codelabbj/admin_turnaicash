@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useCreateUserAppId, useUpdateUserAppId, type UserAppId, type UserAppIdInput } from "@/hooks/useUserAppIds"
+import { usePlatforms } from "@/hooks/usePlatforms"
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
+import api from "@/lib/axios"
+import { toast } from "react-hot-toast"
 
 interface UserAppIdDialogProps {
   open: boolean
@@ -23,14 +27,23 @@ interface UserAppIdDialogProps {
   userAppId?: UserAppId
 }
 
+interface SearchUserResponse {
+  UserId: number
+  Name: string
+  CurrencyId: number
+}
+
 export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDialogProps) {
   const createUserAppId = useCreateUserAppId()
   const updateUserAppId = useUpdateUserAppId()
+  const { data: platforms, isLoading: platformsLoading } = usePlatforms()
 
   const [formData, setFormData] = useState<UserAppIdInput>({
     user_app_id: "",
     app_name: "",
   })
+
+  const [isValidating, setIsValidating] = useState(false)
 
   useEffect(() => {
     if (userAppId) {
@@ -46,10 +59,70 @@ export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDial
     }
   }, [userAppId])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateUserBetId = async (): Promise<boolean> => {
+    if (!formData.app_name || !formData.user_app_id) {
+      toast.error("Veuillez remplir tous les champs requis")
+      return false
+    }
+
+    setIsValidating(true)
+
+    try {
+      const response = await api.post<SearchUserResponse>("/mobcash/search-user", {
+        app_id: formData.app_name,
+        userid: formData.user_app_id,
+      })
+
+      const { UserId, Name, CurrencyId } = response.data
+
+      // Check if user exists
+      if (UserId === 0) {
+        toast.error("Utilisateur non trouvé. Veuillez vérifier l'ID de pari.")
+        setIsValidating(false)
+        return false
+      }
+
+      // Check currency
+      if (CurrencyId !== 27) {
+        toast.error("Cet utilisateur n'utilise pas la devise XOF. Veuillez vérifier votre compte.")
+        setIsValidating(false)
+        return false
+      }
+
+      // Validation successful
+      setIsValidating(false)
+      return true
+    } catch (error: any) {
+      setIsValidating(false)
+
+      // Handle field-specific error messages
+      if (error.response?.status === 400) {
+        const errorData = error.response.data
+
+        if (errorData.error_time_message) {
+          toast.error(errorData.error_time_message)
+        } else if (errorData.userid) {
+          toast.error(Array.isArray(errorData.userid) ? errorData.userid[0] : errorData.userid)
+        } else if (errorData.app_id) {
+          toast.error(Array.isArray(errorData.app_id) ? errorData.app_id[0] : errorData.app_id)
+        } else if (errorData.detail) {
+          toast.error(errorData.detail)
+        } else {
+          toast.error("Erreur lors de la validation de l'ID utilisateur")
+        }
+      } else {
+        toast.error("Erreur lors de la validation de l'ID utilisateur")
+      }
+
+      return false
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (userAppId) {
+      // For update, no validation needed
       updateUserAppId.mutate(
         { id: userAppId.id, data: formData },
         {
@@ -57,6 +130,13 @@ export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDial
         },
       )
     } else {
+      // For create, validate first
+      const isValid = await validateUserBetId()
+      if (!isValid) {
+        return
+      }
+
+      // Proceed with creation after validation
       createUserAppId.mutate(formData, {
         onSuccess: () => {
           onOpenChange(false)
@@ -66,21 +146,21 @@ export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDial
     }
   }
 
-  const isPending = createUserAppId.isPending || updateUserAppId.isPending
+  const isPending = createUserAppId.isPending || updateUserAppId.isPending || isValidating
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{userAppId ? "Edit User App ID" : "Add User App ID"}</DialogTitle>
+          <DialogTitle>{userAppId ? "Modifier l'ID Utilisateur App" : "Ajouter un ID Utilisateur App"}</DialogTitle>
           <DialogDescription>
-            {userAppId ? "Update the user app ID details below." : "Add a new user app ID to the system."}
+            {userAppId ? "Modifiez les détails de l'ID utilisateur app ci-dessous." : "Ajoutez un nouvel ID utilisateur app au système."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="user_app_id">User App ID *</Label>
+            <Label htmlFor="user_app_id">ID Utilisateur App *</Label>
             <Input
               id="user_app_id"
               value={formData.user_app_id}
@@ -92,31 +172,53 @@ export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDial
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="app_name">App Name (UUID) *</Label>
-            <Input
-              id="app_name"
+            <Label htmlFor="app_name">Plateforme *</Label>
+            <Select
               value={formData.app_name}
-              onChange={(e) => setFormData({ ...formData, app_name: e.target.value })}
-              placeholder="e9bfa9d6-9f50-4d9a-ad8b-b017a3f1d3f2"
-              required
-              disabled={isPending}
-            />
+              onValueChange={(value) => setFormData({ ...formData, app_name: value })}
+              disabled={isPending || platformsLoading}
+            >
+              <SelectTrigger id="app_name">
+                <SelectValue placeholder="Sélectionner une plateforme" />
+              </SelectTrigger>
+              <SelectContent>
+                {platformsLoading ? (
+                  <SelectItem value="" disabled>
+                    Chargement...
+                  </SelectItem>
+                ) : platforms && platforms.length > 0 ? (
+                  platforms.map((platform) => (
+                    <SelectItem key={platform.id} value={platform.id}>
+                      {platform.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    Aucune plateforme disponible
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              Annuler
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {userAppId ? "Updating..." : "Creating..."}
+                  {isValidating
+                    ? "Validation..."
+                    : userAppId
+                      ? "Mise à jour..."
+                      : "Création..."}
                 </>
               ) : userAppId ? (
-                "Update"
+                "Mettre à jour"
               ) : (
-                "Create"
+                "Créer"
               )}
             </Button>
           </DialogFooter>

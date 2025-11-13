@@ -43,8 +43,7 @@ export default function NotificationsPage() {
                   <TableHead>ID</TableHead>
                   <TableHead>Titre</TableHead>
                   <TableHead>Contenu</TableHead>
-                  <TableHead>ID Utilisateur</TableHead>
-                  <TableHead>Statut</TableHead>
+                  {/* <TableHead>Statut</TableHead> */}
                   <TableHead>Créé le</TableHead>
                 </TableRow>
               </TableHeader>
@@ -53,13 +52,12 @@ export default function NotificationsPage() {
                   <TableRow key={notification.id}>
                     <TableCell className="font-medium">{notification.id}</TableCell>
                     <TableCell className="font-medium">{notification.title}</TableCell>
-                    <TableCell className="max-w-md truncate">{notification.content}</TableCell>
-                    <TableCell className="font-mono text-xs">{notification.user}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-normal break-words">{notification.content}</TableCell>
+                    {/* <TableCell>
                       <Badge variant={notification.is_read ? "secondary" : "default"}>
-                        {notification.is_read ? "Read" : "Unread"}
+                        {notification.is_read ? "Lu" : "Non lu"}
                       </Badge>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>{new Date(notification.created_at).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}

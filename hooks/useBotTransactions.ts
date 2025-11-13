@@ -23,8 +23,8 @@ export interface BotTransaction {
   validated_at: string | null
   webhook_data: any
   wehook_receive_at: string | null
-  phone_number: string
-  user_app_id: string
+  phone_number: string | null
+  user_app_id: string | null
   withdriwal_code: string | null
   error_message: string | null
   transaction_link: string | null
@@ -32,7 +32,7 @@ export interface BotTransaction {
   otp_code: string | null
   public_id: string | null
   already_process: boolean
-  source: "mobile" | "web" | "bot"
+  source: "mobile" | "web" | "bot" | null
   old_status: string
   old_public_id: string
   success_webhook_send: boolean
@@ -41,7 +41,7 @@ export interface BotTransaction {
   timeout_webhook_send: boolean
   telegram_user: number | null
   app: string
-  network: number
+  network: number | null
 }
 
 export interface BotTransactionsResponse {

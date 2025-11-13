@@ -21,6 +21,7 @@ export interface Settings {
   wave_default_link: string | null
   orange_default_link: string | null
   mtn_default_link: string | null
+  telegram: string | null
 }
 
 export type SettingsInput = Omit<Settings, "id">

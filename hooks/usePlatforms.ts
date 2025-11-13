@@ -9,6 +9,9 @@ export interface Platform {
   name: string
   image: string
   enable: boolean
+  hash: string | null
+  cashdeskid: string | null
+  cashierpass: string | null
   deposit_tuto_link: string | null
   withdrawal_tuto_link: string | null
   why_withdrawal_fail: string | null
@@ -42,7 +45,36 @@ export function useCreatePlatform() {
       return res.data
     },
     onSuccess: () => {
-      toast.success("Platform created successfully!")
+      toast.success("Plateforme créée avec succès!")
+      queryClient.invalidateQueries({ queryKey: ["platforms"] })
+    },
+  })
+}
+
+export function useUpdatePlatform() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PlatformInput> }) => {
+      const res = await api.put<Platform>(`/mobcash/plateform/${id}`, data)
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Plateforme mise à jour avec succès!")
+      queryClient.invalidateQueries({ queryKey: ["platforms"] })
+    },
+  })
+}
+
+export function useDeletePlatform() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/mobcash/plateform/${id}`)
+    },
+    onSuccess: () => {
+      toast.success("Plateforme supprimée avec succès!")
       queryClient.invalidateQueries({ queryKey: ["platforms"] })
     },
   })

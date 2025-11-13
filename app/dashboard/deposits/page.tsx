@@ -1,21 +1,31 @@
 "use client"
 
+import { useState } from "react"
 import { useDeposits, useCaisses } from "@/hooks/useDeposits"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Wallet } from "lucide-react"
+import { Loader2, Wallet, Plus } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CreateDepositDialog } from "@/components/create-deposit-dialog"
 
 export default function DepositsPage() {
   const { data: depositsData, isLoading: depositsLoading } = useDeposits()
   const { data: caisses, isLoading: caissesLoading } = useCaisses()
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dépôts & Caisses</h2>
-        <p className="text-muted-foreground">Consultez les dépôts et soldes de caisse</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dépôts & Caisses</h2>
+          <p className="text-muted-foreground">Consultez les dépôts et soldes de caisse</p>
+        </div>
+        <Button onClick={() => setCreateDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Créer un Dépôt
+        </Button>
       </div>
 
       <Tabs defaultValue="caisses" className="w-full">
@@ -104,6 +114,8 @@ export default function DepositsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <CreateDepositDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </div>
   )
 }

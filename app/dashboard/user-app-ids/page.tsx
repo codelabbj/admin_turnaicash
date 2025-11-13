@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Copy } from "lucide-react"
+import { toast } from "react-hot-toast"
 import { UserAppIdDialog } from "@/components/user-app-id-dialog"
 import {
   AlertDialog,
@@ -54,6 +55,15 @@ export default function UserAppIdsPage() {
     }
   }
 
+  const handleCopy = async (betId: string) => {
+    try {
+      await navigator.clipboard.writeText(betId)
+      toast.success("ID copié dans le presse-papiers")
+    } catch (error) {
+      toast.error("Erreur lors de la copie")
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -94,9 +104,20 @@ export default function UserAppIdsPage() {
                   <TableRow key={userAppId.id}>
                     <TableCell className="font-medium">{userAppId.id}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{userAppId.user_app_id}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{userAppId.user_app_id}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleCopy(userAppId.user_app_id)}
+                          title="Copier l'ID"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{userAppId.app_name}</TableCell>
+                    <TableCell>{userAppId.app_details?.name || userAppId.app_name}</TableCell>
                     <TableCell>{userAppId.telegram_user || "-"}</TableCell>
                     <TableCell>{new Date(userAppId.created_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">

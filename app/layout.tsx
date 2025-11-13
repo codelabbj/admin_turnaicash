@@ -10,9 +10,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Tableau de Bord Admin TURNAICASH",
-  description: "Tableau de bord administrateur pour la plateforme TURNAICASH",
-  generator: "v0.app",
+  title: "Tableau de Bord Admin TURAINCASH",
+  description: "Tableau de bord administrateur pour la plateforme TURAINCASH",
 }
 
 export default function RootLayout({

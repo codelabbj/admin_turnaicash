@@ -180,6 +180,21 @@ export default function SettingsPage() {
                   <span className="text-sm text-muted-foreground">N/A</span>
                 )}
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Telegram (telegram)</span>
+                {settings.telegram ? (
+                  <a
+                    href={settings.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Voir
+                  </a>
+                ) : (
+                  <span className="text-sm text-muted-foreground">N/A</span>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

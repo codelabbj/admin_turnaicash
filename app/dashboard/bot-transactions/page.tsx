@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Search, RefreshCw } from "lucide-react"
+import { Loader2, Plus, Search, RefreshCw, Copy } from "lucide-react"
+import { toast } from "react-hot-toast"
 import { CreateBotTransactionDialog } from "@/components/create-bot-transaction-dialog"
 import { ChangeBotStatusDialog } from "@/components/change-bot-status-dialog"
 
@@ -33,22 +34,94 @@ export default function BotTransactionsPage() {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "accept":
-        return "default"
+      case "success":
+        return "default" // Green (success)
       case "error":
-        return "destructive"
-      case "init_payment":
-        return "secondary"
+      case "reject":
+      case "fail":
+      case "failed":
+        return "destructive" // Red (error)
       case "pending":
-        return "outline"
+        return "secondary" // Gray/neutral
+      case "init_payment":
+        return "outline" // Processing
+      case "timeout":
+        return "outline" // Border only
+      default:
+        return "secondary" // Default fallback
+    }
+  }
+
+  const getStatusLabel = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "accept":
+      case "success":
+        return "Accepté"
+      case "error":
+      case "reject":
+      case "fail":
+      case "failed":
+        return "Erreur"
+      case "pending":
+        return "En attente"
+      case "init_payment":
+        return "En traitement"
+      case "timeout":
+        return "Expiré"
+      default:
+        return status
+    }
+  }
+
+  const getTypeTransLabel = (type: string): string => {
+    switch (type.toLowerCase()) {
+      case "deposit":
+        return "Dépôt"
+      case "withdrawal":
+        return "Retrait"
+      case "disbursements":
+        return "Décaissements"
+      case "reward":
+        return "Récompense"
+      default:
+        return type
+    }
+  }
+
+  const getTypeTransColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "deposit":
+        return "default" // Green/primary
+      case "withdrawal":
+        return "secondary" // Gray
+      case "disbursements":
+        return "outline" // Border
+      case "reward":
+        return "outline" // Border
       default:
         return "secondary"
     }
   }
 
-  const getNetworkName = (networkId: number) => {
-    return networks?.find((n) => n.id === networkId)?.public_name || "Unknown"
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success("Copié dans le presse-papiers")
+    } catch (error) {
+      toast.error("Erreur lors de la copie")
+    }
+  }
+
+  const getNetworkName = (networkId: number | null) => {
+    if (!networkId) return "-"
+    return networks?.find((n) => n.id === networkId)?.public_name || "-"
+  }
+
+  const displayValue = (value: string | number | null | undefined): string => {
+    if (value === null || value === undefined || value === "") return "-"
+    return String(value)
   }
 
   return (
@@ -182,6 +255,7 @@ export default function BotTransactionsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Référence</TableHead>
+                    <TableHead>ID Pari</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Téléphone</TableHead>
@@ -195,20 +269,55 @@ export default function BotTransactionsPage() {
                 <TableBody>
                   {transactionsData.results.map((transaction) => (
                     <TableRow key={transaction.id}>
-                      <TableCell className="font-mono text-xs">{transaction.reference}</TableCell>
                       <TableCell>
-                        <Badge variant={transaction.type_trans === "deposit" ? "default" : "secondary"}>
-                          {transaction.type_trans}
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs">{displayValue(transaction.reference)}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleCopy(transaction.reference)}
+                            title="Copier la référence"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{displayValue(transaction.user_app_id)}</Badge>
+                          {transaction.user_app_id && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleCopy(transaction.user_app_id!)}
+                              title="Copier l'ID pari"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getTypeTransColor(transaction.type_trans || "")}>
+                          {getTypeTransLabel(transaction.type_trans || "")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-semibold">{transaction.amount} FCFA</TableCell>
-                      <TableCell>{transaction.phone_number}</TableCell>
+                      <TableCell className="font-semibold">{displayValue(transaction.amount)} FCFA</TableCell>
+                      <TableCell>{displayValue(transaction.phone_number)}</TableCell>
                       <TableCell>{getNetworkName(transaction.network)}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusColor(transaction.status)}>{transaction.status}</Badge>
+                        <Badge variant={getStatusColor(transaction.status)}>
+                          {getStatusLabel(transaction.status)}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{transaction.source}</Badge>
+                        {transaction.source ? (
+                          <Badge variant="outline">{displayValue(transaction.source)}</Badge>
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                       <TableCell>{new Date(transaction.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">

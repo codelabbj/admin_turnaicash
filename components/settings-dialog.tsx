@@ -44,6 +44,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
     wave_default_link: null,
     orange_default_link: null,
     mtn_default_link: null,
+    telegram: null,
   })
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
         wave_default_link: settings.wave_default_link,
         orange_default_link: settings.orange_default_link,
         mtn_default_link: settings.mtn_default_link,
+        telegram: settings.telegram,
       })
     }
   }, [settings])
@@ -78,7 +80,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="!w-[95vw] !max-w-[91vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier les Paramètres</DialogTitle>
           <DialogDescription>Mettez à jour les paramètres de configuration de la plateforme</DialogDescription>
@@ -151,7 +153,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
             <TabsContent value="rewards" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="bonus_percent">Pourcentage de Bonus *</Label>
+                  <Label htmlFor="bonus_percent">Pourcentage de Bonus promo*</Label>
                   <Input
                     id="bonus_percent"
                     type="number"
@@ -164,7 +166,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="deposit_reward_percent">Pourcentage de Récompense de Dépôt *</Label>
+                  <Label htmlFor="deposit_reward_percent">Pourcentage de Récompense de Dépôt promo*</Label>
                   <Input
                     id="deposit_reward_percent"
                     type="number"
@@ -177,7 +179,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="referral_bonus">Bonus de Parrainage</Label>
+                  <Label htmlFor="referral_bonus">Bonus de parrainnage de Turanicash </Label>
                   <Switch
                     id="referral_bonus"
                     checked={formData.referral_bonus}
@@ -187,7 +189,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="deposit_reward">Récompense de Dépôt</Label>
+                  <Label htmlFor="deposit_reward">Bonus de parrainnage de Turanicash</Label>
                   <Switch
                     id="deposit_reward"
                     checked={formData.deposit_reward}
@@ -281,6 +283,18 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                     value={formData.mtn_default_link || ""}
                     onChange={(e) => setFormData({ ...formData, mtn_default_link: e.target.value || null })}
                     placeholder="https://..."
+                    disabled={updateSettings.isPending}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="telegram">Telegram</Label>
+                  <Input
+                    id="telegram"
+                    type="url"
+                    value={formData.telegram || ""}
+                    onChange={(e) => setFormData({ ...formData, telegram: e.target.value || null })}
+                    placeholder="https://t.me/..."
                     disabled={updateSettings.isPending}
                   />
                 </div>
