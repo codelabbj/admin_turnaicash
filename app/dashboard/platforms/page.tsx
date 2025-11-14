@@ -1,12 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { usePlatforms } from "@/hooks/usePlatforms"
+import { usePlatforms, type PlatformFilters } from "@/hooks/usePlatforms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react"
 import { PlatformDialog } from "@/components/platform-dialog"
 import { useDeletePlatform, type Platform } from "@/hooks/usePlatforms"
 import {
@@ -21,7 +24,12 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function PlatformsPage() {
-  const { data: platforms, isLoading } = usePlatforms()
+  const [filters, setFilters] = useState<PlatformFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: platformsData, isLoading } = usePlatforms(filters)
   const deletePlatform = useDeletePlatform()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | undefined>()
@@ -69,30 +77,77 @@ export default function PlatformsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les plateformes</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par nom..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Statut</Label>
+              <Select
+                value={filters.enable === undefined ? "all" : filters.enable ? "active" : "inactive"}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    enable: value === "all" ? undefined : value === "active",
+                    page: 1,
+                  })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="inactive">Inactif</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des Plateformes</CardTitle>
-          <CardDescription>Total : {platforms?.length || 0} plateformes</CardDescription>
+          <CardDescription>Total : {platformsData?.count || 0} plateformes</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : platforms && platforms.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Dépôt Min</TableHead>
-                  <TableHead>Dépôt Max</TableHead>
-                  <TableHead>Retrait Min</TableHead>
-                  <TableHead>Gain Max</TableHead>
-                  <TableHead>Localisation</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {platforms.map((platform) => (
+          ) : platformsData && platformsData.results && platformsData.results.length > 0 ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Dépôt Min</TableHead>
+                    <TableHead>Dépôt Max</TableHead>
+                    <TableHead>Retrait Min</TableHead>
+                    <TableHead>Gain Max</TableHead>
+                    <TableHead>Localisation</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {platformsData.results.map((platform) => (
                   <TableRow key={platform.id}>
                     <TableCell className="font-medium">{platform.name}</TableCell>
                     <TableCell>
@@ -118,9 +173,34 @@ export default function PlatformsPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((platformsData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!platformsData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!platformsData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucune plateforme trouvée</div>
           )}
@@ -134,7 +214,7 @@ export default function PlatformsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ceci supprimera définitivement la plateforme "{platformToDelete?.name}". Cette action ne peut pas être annulée.
+              Ceci supprimera définitivement la plateforme &quot;{platformToDelete?.name}&quot;. Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

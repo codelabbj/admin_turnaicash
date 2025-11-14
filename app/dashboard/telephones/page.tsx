@@ -1,13 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { useTelephones, useDeleteTelephone, type Telephone } from "@/hooks/useTelephones"
+import { useTelephones, useDeleteTelephone, type Telephone, type TelephoneFilters } from "@/hooks/useTelephones"
 import { useNetworks } from "@/hooks/useNetworks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react"
 import { TelephoneDialog } from "@/components/telephone-dialog"
 import {
   AlertDialog,
@@ -21,8 +24,13 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function TelephonesPage() {
-  const { data: telephones, isLoading } = useTelephones()
-  const { data: networks } = useNetworks()
+  const [filters, setFilters] = useState<TelephoneFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: telephonesData, isLoading } = useTelephones(filters)
+  const { data: networksData } = useNetworks()
   const deleteTelephone = useDeleteTelephone()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -57,7 +65,8 @@ export default function TelephonesPage() {
   }
 
   const getNetworkName = (networkId: number) => {
-    return networks?.find((n) => n.id === networkId)?.public_name || "Unknown"
+    const networks = networksData?.results || []
+    return networks.find((n) => n.id === networkId)?.public_name || "Unknown"
   }
 
   return (
@@ -75,50 +84,125 @@ export default function TelephonesPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les téléphones</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par numéro..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="network">Réseau</Label>
+              <Select
+                value={filters.network?.toString() || "all"}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    network: value === "all" ? undefined : Number.parseInt(value),
+                    page: 1,
+                  })
+                }
+              >
+                <SelectTrigger id="network">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les Réseaux</SelectItem>
+                  {(networksData?.results || []).map((network) => (
+                    <SelectItem key={network.id} value={network.id.toString()}>
+                      {network.public_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des Téléphones</CardTitle>
-          <CardDescription>Total : {telephones?.length || 0} téléphones</CardDescription>
+          <CardDescription>Total : {telephonesData?.count || 0} téléphones</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : telephones && telephones.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Numéro de Téléphone</TableHead>
-                  <TableHead>Réseau</TableHead>
-                  <TableHead>Utilisateur Telegram</TableHead>
-                  <TableHead>Créé le</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {telephones.map((telephone) => (
-                  <TableRow key={telephone.id}>
-                    <TableCell className="font-medium">{telephone.id}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{telephone.phone}</Badge>
-                    </TableCell>
-                    <TableCell>{getNetworkName(telephone.network)}</TableCell>
-                    <TableCell>{telephone.telegram_user || "-"}</TableCell>
-                    <TableCell>{new Date(telephone.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(telephone)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(telephone)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          ) : telephonesData && telephonesData.results && telephonesData.results.length > 0 ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Numéro de Téléphone</TableHead>
+                    <TableHead>Réseau</TableHead>
+                    <TableHead>Utilisateur Telegram</TableHead>
+                    <TableHead>Créé le</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {telephonesData.results.map((telephone) => (
+                    <TableRow key={telephone.id}>
+                      <TableCell className="font-medium">{telephone.id}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{telephone.phone}</Badge>
+                      </TableCell>
+                      <TableCell>{getNetworkName(telephone.network)}</TableCell>
+                      <TableCell>{telephone.telegram_user || "-"}</TableCell>
+                      <TableCell>{new Date(telephone.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(telephone)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(telephone)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((telephonesData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!telephonesData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!telephonesData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucun téléphone trouvé</div>
           )}

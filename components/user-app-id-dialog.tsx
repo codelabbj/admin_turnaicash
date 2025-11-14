@@ -186,8 +186,8 @@ export function UserAppIdDialog({ open, onOpenChange, userAppId }: UserAppIdDial
                   <SelectItem value="" disabled>
                     Chargement...
                   </SelectItem>
-                ) : platforms && platforms.length > 0 ? (
-                  platforms.map((platform) => (
+                ) : platforms?.results && platforms.results.length > 0 ? (
+                  platforms.results.map((platform) => (
                     <SelectItem key={platform.id} value={platform.id}>
                       {platform.name}
                     </SelectItem>

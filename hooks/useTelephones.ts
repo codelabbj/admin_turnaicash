@@ -18,12 +18,43 @@ export type TelephoneInput = {
   network: number
 }
 
-export function useTelephones() {
+export interface TelephonesResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Telephone[]
+}
+
+export interface TelephoneFilters {
+  page?: number
+  page_size?: number
+  search?: string
+  network?: number
+}
+
+export function useTelephones(filters: TelephoneFilters = {}) {
   return useQuery({
-    queryKey: ["telephones"],
+    queryKey: ["telephones", filters],
     queryFn: async () => {
-      const res = await api.get<Telephone[]>("/mobcash/user-phone/")
-      return res.data
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.search) params.search = filters.search
+      if (filters.network) params.network = filters.network
+
+      const res = await api.get<Telephone[] | TelephonesResponse>("/mobcash/user-phone/", { params })
+      
+      // Handle both array response and paginated response
+      if (Array.isArray(res.data)) {
+        return {
+          count: res.data.length,
+          next: null,
+          previous: null,
+          results: res.data,
+        } as TelephonesResponse
+      }
+      
+      return res.data as TelephonesResponse
     },
   })
 }

@@ -27,11 +27,22 @@ export interface SendNotificationInput {
   user_id?: string
 }
 
-export function useNotifications() {
+export interface NotificationFilters {
+  page?: number
+  page_size?: number
+  search?: string
+}
+
+export function useNotifications(filters: NotificationFilters = {}) {
   return useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["notifications", filters],
     queryFn: async () => {
-      const res = await api.get<NotificationsResponse>("/mobcash/notification")
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.search) params.search = filters.search
+
+      const res = await api.get<NotificationsResponse>("/mobcash/notification", { params })
       return res.data
     },
   })

@@ -1,12 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { useNetworks, useDeleteNetwork, type Network } from "@/hooks/useNetworks"
+import { useNetworks, useDeleteNetwork, type Network, type NetworkFilters } from "@/hooks/useNetworks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react"
 import { NetworkDialog } from "@/components/network-dialog"
 import {
   AlertDialog,
@@ -20,7 +23,12 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function NetworksPage() {
-  const { data: networks, isLoading } = useNetworks()
+  const [filters, setFilters] = useState<NetworkFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: networksData, isLoading } = useNetworks(filters)
   const deleteNetwork = useDeleteNetwork()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -69,29 +77,76 @@ export default function NetworksPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les réseaux</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par nom..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Statut</Label>
+              <Select
+                value={filters.enable === undefined ? "all" : filters.enable ? "active" : "inactive"}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    enable: value === "all" ? undefined : value === "active",
+                    page: 1,
+                  })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="inactive">Inactif</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des Réseaux</CardTitle>
-          <CardDescription>Total : {networks?.length || 0} réseaux</CardDescription>
+          <CardDescription>Total : {networksData?.count || 0} réseaux</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : networks && networks.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Nom Public</TableHead>
-                  <TableHead>Pays</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Dépôt</TableHead>
-                  <TableHead>Retrait</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {networks.map((network) => (
+          ) : networksData && networksData.results && networksData.results.length > 0 ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Nom Public</TableHead>
+                    <TableHead>Pays</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Dépôt</TableHead>
+                    <TableHead>Retrait</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {networksData.results.map((network) => (
                   <TableRow key={network.id}>
                     <TableCell className="font-medium">{network.name}</TableCell>
                     <TableCell>{network.public_name}</TableCell>
@@ -126,9 +181,34 @@ export default function NetworksPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((networksData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!networksData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!networksData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucun réseau trouvé</div>
           )}

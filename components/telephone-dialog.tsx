@@ -44,7 +44,7 @@ export function TelephoneDialog({ open, onOpenChange, telephone }: TelephoneDial
     } else {
       setFormData({
         phone: "",
-        network: networks?.[0]?.id || 0,
+        network: networks?.results?.[0]?.id || 0,
       })
     }
   }, [telephone, networks])
@@ -63,7 +63,7 @@ export function TelephoneDialog({ open, onOpenChange, telephone }: TelephoneDial
       createTelephone.mutate(formData, {
         onSuccess: () => {
           onOpenChange(false)
-          setFormData({ phone: "", network: networks?.[0]?.id || 0 })
+          setFormData({ phone: "", network: networks?.results?.[0]?.id || 0 })
         },
       })
     }
@@ -105,7 +105,7 @@ export function TelephoneDialog({ open, onOpenChange, telephone }: TelephoneDial
                 <SelectValue placeholder="Select a network" />
               </SelectTrigger>
               <SelectContent>
-                {networks?.map((network) => (
+                {networks?.results?.map((network) => (
                   <SelectItem key={network.id} value={network.id.toString()}>
                     {network.public_name}
                   </SelectItem>

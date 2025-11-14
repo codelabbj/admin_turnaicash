@@ -26,12 +26,43 @@ export interface Platform {
 
 export type PlatformInput = Omit<Platform, "id">
 
-export function usePlatforms() {
+export interface PlatformsResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Platform[]
+}
+
+export interface PlatformFilters {
+  page?: number
+  page_size?: number
+  search?: string
+  enable?: boolean
+}
+
+export function usePlatforms(filters: PlatformFilters = {}) {
   return useQuery({
-    queryKey: ["platforms"],
+    queryKey: ["platforms", filters],
     queryFn: async () => {
-      const res = await api.get<Platform[]>("/mobcash/plateform")
-      return res.data
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.search) params.search = filters.search
+      if (filters.enable !== undefined) params.enable = filters.enable
+
+      const res = await api.get<Platform[] | PlatformsResponse>("/mobcash/plateform", { params })
+      
+      // Handle both array response and paginated response
+      if (Array.isArray(res.data)) {
+        return {
+          count: res.data.length,
+          next: null,
+          previous: null,
+          results: res.data,
+        } as PlatformsResponse
+      }
+      
+      return res.data as PlatformsResponse
     },
   })
 }

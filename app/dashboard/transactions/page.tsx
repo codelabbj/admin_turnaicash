@@ -110,7 +110,8 @@ export default function TransactionsPage() {
 
   const getNetworkName = (networkId: number | null) => {
     if (!networkId) return "-"
-    return networks?.find((n) => n.id === networkId)?.public_name || "-"
+    const networksList = networks?.results || []
+    return networksList.find((n) => n.id === networkId)?.public_name || "-"
   }
 
   const displayValue = (value: string | number | null | undefined): string => {
@@ -218,7 +219,7 @@ export default function TransactionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les Réseaux</SelectItem>
-                  {networks?.map((network) => (
+                  {(networks?.results || []).map((network) => (
                     <SelectItem key={network.id} value={network.id.toString()}>
                       {network.public_name}
                     </SelectItem>

@@ -1,13 +1,22 @@
 "use client"
 
-import { useBonuses } from "@/hooks/useBonuses"
+import { useState } from "react"
+import { useBonuses, type BonusFilters } from "@/hooks/useBonuses"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Loader2, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function BonusesPage() {
-  const { data: bonusesData, isLoading } = useBonuses()
+  const [filters, setFilters] = useState<BonusFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: bonusesData, isLoading } = useBonuses(filters)
 
   return (
     <div className="space-y-6">
@@ -15,6 +24,39 @@ export default function BonusesPage() {
         <h2 className="text-3xl font-bold tracking-tight">Bonus</h2>
         <p className="text-muted-foreground">Consultez les bonus et récompenses des utilisateurs</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher les bonus</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par raison ou utilisateur..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="user">ID Utilisateur</Label>
+              <Input
+                id="user"
+                placeholder="Filtrer par ID utilisateur..."
+                value={filters.user || ""}
+                onChange={(e) => setFilters({ ...filters, user: e.target.value || undefined, page: 1 })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -27,34 +69,60 @@ export default function BonusesPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : bonusesData && bonusesData.results.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Montant</TableHead>
-                  <TableHead>Raison</TableHead>
-                  <TableHead>ID Utilisateur</TableHead>
-                  <TableHead>Transaction</TableHead>
-                  <TableHead>Créé le</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bonusesData.results.map((bonus) => (
-                  <TableRow key={bonus.id}>
-                    <TableCell className="font-medium">{bonus.id}</TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="font-mono">
-                        {bonus.amount} FCFA
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{bonus.reason_bonus}</TableCell>
-                    <TableCell className="font-mono text-xs">{bonus.user}</TableCell>
-                    <TableCell>{bonus.transaction || "-"}</TableCell>
-                    <TableCell>{new Date(bonus.created_at).toLocaleDateString()}</TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Montant</TableHead>
+                    <TableHead>Raison</TableHead>
+                    <TableHead>ID Utilisateur</TableHead>
+                    <TableHead>Transaction</TableHead>
+                    <TableHead>Créé le</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {bonusesData.results.map((bonus) => (
+                    <TableRow key={bonus.id}>
+                      <TableCell className="font-medium">{bonus.id}</TableCell>
+                      <TableCell>
+                        <Badge variant="default" className="font-mono">
+                          {bonus.amount} FCFA
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{bonus.reason_bonus}</TableCell>
+                      <TableCell className="font-mono text-xs">{bonus.user}</TableCell>
+                      <TableCell>{bonus.transaction || "-"}</TableCell>
+                      <TableCell>{new Date(bonus.created_at).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((bonusesData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!bonusesData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!bonusesData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucun bonus trouvé</div>
           )}

@@ -1,18 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { useDeposits, useCaisses } from "@/hooks/useDeposits"
+import { useDeposits, useCaisses, type DepositFilters } from "@/hooks/useDeposits"
+import { usePlatforms } from "@/hooks/usePlatforms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Wallet, Plus } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, Wallet, Plus, Search } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreateDepositDialog } from "@/components/create-deposit-dialog"
 
 export default function DepositsPage() {
-  const { data: depositsData, isLoading: depositsLoading } = useDeposits()
+  const [filters, setFilters] = useState<DepositFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: depositsData, isLoading: depositsLoading } = useDeposits(filters)
   const { data: caisses, isLoading: caissesLoading } = useCaisses()
+  const { data: platformsData } = usePlatforms()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   return (
@@ -74,6 +84,55 @@ export default function DepositsPage() {
         <TabsContent value="deposits" className="space-y-4">
           <Card>
             <CardHeader>
+              <CardTitle>Filtres</CardTitle>
+              <CardDescription>Rechercher et filtrer les dépôts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="search">Rechercher</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="search"
+                      placeholder="Rechercher..."
+                      value={filters.search || ""}
+                      onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bet_app">Plateforme</Label>
+                  <Select
+                    value={filters.bet_app || "all"}
+                    onValueChange={(value) =>
+                      setFilters({
+                        ...filters,
+                        bet_app: value === "all" ? undefined : value,
+                        page: 1,
+                      })
+                    }
+                  >
+                    <SelectTrigger id="bet_app">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les Plateformes</SelectItem>
+                      {platformsData?.results?.map((platform) => (
+                        <SelectItem key={platform.id} value={platform.id}>
+                          {platform.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Liste des Dépôts</CardTitle>
               <CardDescription>Total : {depositsData?.count || 0} dépôts</CardDescription>
             </CardHeader>
@@ -83,30 +142,56 @@ export default function DepositsPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
               ) : depositsData && depositsData.results.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Plateforme</TableHead>
-                  <TableHead>Montant</TableHead>
-                  <TableHead>Créé le</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {depositsData.results.map((deposit) => (
-                      <TableRow key={deposit.id}>
-                        <TableCell className="font-medium">{deposit.id}</TableCell>
-                        <TableCell>{deposit.bet_app.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="default" className="font-mono">
-                            {deposit.amount} FCFA
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(deposit.created_at).toLocaleDateString()}</TableCell>
+                <div className="space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Plateforme</TableHead>
+                        <TableHead>Montant</TableHead>
+                        <TableHead>Créé le</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {depositsData.results.map((deposit) => (
+                        <TableRow key={deposit.id}>
+                          <TableCell className="font-medium">{deposit.id}</TableCell>
+                          <TableCell>{deposit.bet_app.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="default" className="font-mono">
+                              {deposit.amount} FCFA
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(deposit.created_at).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Page {filters.page} sur {Math.ceil((depositsData?.count || 0) / (filters.page_size || 10))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                        disabled={!depositsData?.previous}
+                      >
+                        Précédent
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                        disabled={!depositsData?.next}
+                      >
+                        Suivant
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">Aucun dépôt trouvé</div>
               )}

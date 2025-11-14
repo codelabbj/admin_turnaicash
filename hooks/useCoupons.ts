@@ -25,11 +25,24 @@ export interface CouponInput {
   bet_app: string
 }
 
-export function useCoupons() {
+export interface CouponFilters {
+  page?: number
+  page_size?: number
+  search?: string
+  bet_app?: string
+}
+
+export function useCoupons(filters: CouponFilters = {}) {
   return useQuery({
-    queryKey: ["coupons"],
+    queryKey: ["coupons", filters],
     queryFn: async () => {
-      const res = await api.get<CouponsResponse>("/mobcash/coupon")
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.search) params.search = filters.search
+      if (filters.bet_app) params.bet_app = filters.bet_app
+
+      const res = await api.get<CouponsResponse>("/mobcash/coupon", { params })
       return res.data
     },
   })

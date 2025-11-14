@@ -1,12 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { useUserAppIds, useDeleteUserAppId, type UserAppId } from "@/hooks/useUserAppIds"
+import { useUserAppIds, useDeleteUserAppId, type UserAppId, type UserAppIdFilters } from "@/hooks/useUserAppIds"
+import { usePlatforms } from "@/hooks/usePlatforms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Pencil, Trash2, Copy } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Copy, Search } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { UserAppIdDialog } from "@/components/user-app-id-dialog"
 import {
@@ -21,7 +25,13 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function UserAppIdsPage() {
-  const { data: userAppIds, isLoading } = useUserAppIds()
+  const [filters, setFilters] = useState<UserAppIdFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: userAppIdsData, isLoading } = useUserAppIds(filters)
+  const { data: platformsData } = usePlatforms()
   const deleteUserAppId = useDeleteUserAppId()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -79,28 +89,78 @@ export default function UserAppIdsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les IDs utilisateur app</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par ID utilisateur app..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app_name">Plateforme</Label>
+              <Select
+                value={filters.app_name || "all"}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    app_name: value === "all" ? undefined : value,
+                    page: 1,
+                  })
+                }
+              >
+                <SelectTrigger id="app_name">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les Plateformes</SelectItem>
+                  {(platformsData?.results || []).map((platform) => (
+                    <SelectItem key={platform.id} value={platform.id}>
+                      {platform.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des IDs Utilisateur App</CardTitle>
-          <CardDescription>Total : {userAppIds?.length || 0} IDs utilisateur app</CardDescription>
+          <CardDescription>Total : {userAppIdsData?.count || 0} IDs utilisateur app</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : userAppIds && userAppIds.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>ID Utilisateur App</TableHead>
-                  <TableHead>Nom de l'App</TableHead>
-                  <TableHead>Utilisateur Telegram</TableHead>
-                  <TableHead>Créé le</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userAppIds.map((userAppId) => (
+          ) : userAppIdsData && userAppIdsData.results && userAppIdsData.results.length > 0 ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>ID Utilisateur App</TableHead>
+                    <TableHead>Nom de l'App</TableHead>
+                    <TableHead>Utilisateur Telegram</TableHead>
+                    <TableHead>Créé le</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userAppIdsData.results.map((userAppId) => (
                   <TableRow key={userAppId.id}>
                     <TableCell className="font-medium">{userAppId.id}</TableCell>
                     <TableCell>
@@ -131,9 +191,34 @@ export default function UserAppIdsPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((userAppIdsData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!userAppIdsData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!userAppIdsData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucun ID utilisateur app trouvé</div>
           )}

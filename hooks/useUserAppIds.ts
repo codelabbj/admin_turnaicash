@@ -36,12 +36,43 @@ export type UserAppIdInput = {
   app_name: string
 }
 
-export function useUserAppIds() {
+export interface UserAppIdsResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: UserAppId[]
+}
+
+export interface UserAppIdFilters {
+  page?: number
+  page_size?: number
+  search?: string
+  app_name?: string
+}
+
+export function useUserAppIds(filters: UserAppIdFilters = {}) {
   return useQuery({
-    queryKey: ["user-app-ids"],
+    queryKey: ["user-app-ids", filters],
     queryFn: async () => {
-      const res = await api.get<UserAppId[]>("/mobcash/user-app-id/")
-      return res.data
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.search) params.search = filters.search
+      if (filters.app_name) params.app_name = filters.app_name
+
+      const res = await api.get<UserAppId[] | UserAppIdsResponse>("/mobcash/user-app-id/", { params })
+      
+      // Handle both array response and paginated response
+      if (Array.isArray(res.data)) {
+        return {
+          count: res.data.length,
+          next: null,
+          previous: null,
+          results: res.data,
+        } as UserAppIdsResponse
+      }
+      
+      return res.data as UserAppIdsResponse
     },
   })
 }

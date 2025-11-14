@@ -1,11 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { useCoupons, useDeleteCoupon, type Coupon } from "@/hooks/useCoupons"
+import { useCoupons, useDeleteCoupon, type Coupon, type CouponFilters } from "@/hooks/useCoupons"
+import { usePlatforms } from "@/hooks/usePlatforms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react"
 import { CouponDialog } from "@/components/coupon-dialog"
 import {
   AlertDialog,
@@ -19,7 +23,13 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function CouponsPage() {
-  const { data: couponsData, isLoading } = useCoupons()
+  const [filters, setFilters] = useState<CouponFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: couponsData, isLoading } = useCoupons(filters)
+  const { data: platformsData } = usePlatforms()
   const deleteCoupon = useDeleteCoupon()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -68,6 +78,55 @@ export default function CouponsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Rechercher et filtrer les coupons</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="search">Rechercher</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Rechercher par code..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bet_app">Plateforme</Label>
+              <Select
+                value={filters.bet_app || "all"}
+                onValueChange={(value) =>
+                  setFilters({
+                    ...filters,
+                    bet_app: value === "all" ? undefined : value,
+                    page: 1,
+                  })
+                }
+              >
+                <SelectTrigger id="bet_app">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les Plateformes</SelectItem>
+                  {platformsData?.results?.map((platform) => (
+                    <SelectItem key={platform.id} value={platform.id}>
+                      {platform.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des Coupons</CardTitle>
           <CardDescription>Total : {couponsData?.count || 0} coupons</CardDescription>
         </CardHeader>
@@ -77,18 +136,19 @@ export default function CouponsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : couponsData && couponsData.results.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Plateforme</TableHead>
-                  <TableHead>Créé le</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {couponsData.results.map((coupon) => (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Plateforme</TableHead>
+                    <TableHead>Créé le</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {couponsData.results.map((coupon) => (
                   <TableRow key={coupon.id}>
                     <TableCell className="font-medium">{coupon.id}</TableCell>
                     <TableCell className="font-mono">{coupon.code}</TableCell>
@@ -109,9 +169,34 @@ export default function CouponsPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((couponsData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!couponsData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!couponsData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucun coupon trouvé</div>
           )}

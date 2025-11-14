@@ -182,7 +182,7 @@ export function CreateBotTransactionDialog({ open, onOpenChange }: CreateBotTran
                       <SelectValue placeholder="Select network" />
                     </SelectTrigger>
                     <SelectContent>
-                      {networks?.map((network) => (
+                      {networks?.results?.map((network) => (
                         <SelectItem key={network.id} value={network.id.toString()}>
                           {network.public_name}
                         </SelectItem>
@@ -308,7 +308,7 @@ export function CreateBotTransactionDialog({ open, onOpenChange }: CreateBotTran
                       <SelectValue placeholder="Select network" />
                     </SelectTrigger>
                     <SelectContent>
-                      {networks?.map((network) => (
+                      {networks?.results?.map((network) => (
                         <SelectItem key={network.id} value={network.id.toString()}>
                           {network.public_name}
                         </SelectItem>

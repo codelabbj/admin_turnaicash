@@ -1,11 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { useAdvertisements, useDeleteAdvertisement, type Advertisement } from "@/hooks/useAdvertisements"
+import { useAdvertisements, useDeleteAdvertisement, type Advertisement, type AdvertisementFilters } from "@/hooks/useAdvertisements"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react"
 import { AdvertisementDialog } from "@/components/advertisement-dialog"
 import {
@@ -20,7 +22,12 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function AdvertisementsPage() {
-  const { data: advertisementsData, isLoading } = useAdvertisements()
+  const [filters, setFilters] = useState<AdvertisementFilters>({
+    page: 1,
+    page_size: 10,
+  })
+
+  const { data: advertisementsData, isLoading } = useAdvertisements(filters)
   const deleteAdvertisement = useDeleteAdvertisement()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -69,6 +76,37 @@ export default function AdvertisementsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Filtres</CardTitle>
+          <CardDescription>Filtrer les annonces</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="status">Statut</Label>
+            <Select
+              value={filters.enable === undefined ? "all" : filters.enable ? "active" : "inactive"}
+              onValueChange={(value) =>
+                setFilters({
+                  ...filters,
+                  enable: value === "all" ? undefined : value === "active",
+                  page: 1,
+                })
+              }
+            >
+              <SelectTrigger id="status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="active">Actif</SelectItem>
+                <SelectItem value="inactive">Inactif</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Liste des Annonces</CardTitle>
           <CardDescription>Total : {advertisementsData?.count || 0} annonces</CardDescription>
         </CardHeader>
@@ -78,18 +116,19 @@ export default function AdvertisementsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : advertisementsData && advertisementsData.results.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Créé le</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {advertisementsData.results.map((advertisement) => (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Créé le</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {advertisementsData.results.map((advertisement) => (
                   <TableRow key={advertisement.id}>
                     <TableCell className="font-medium">{advertisement.id}</TableCell>
                     <TableCell>
@@ -120,9 +159,34 @@ export default function AdvertisementsPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {filters.page} sur {Math.ceil((advertisementsData?.count || 0) / (filters.page_size || 10))}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+                    disabled={!advertisementsData?.previous}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+                    disabled={!advertisementsData?.next}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">Aucune annonce trouvée</div>
           )}

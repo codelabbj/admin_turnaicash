@@ -23,11 +23,22 @@ export interface AdvertisementInput {
   enable: boolean
 }
 
-export function useAdvertisements() {
+export interface AdvertisementFilters {
+  page?: number
+  page_size?: number
+  enable?: boolean
+}
+
+export function useAdvertisements(filters: AdvertisementFilters = {}) {
   return useQuery({
-    queryKey: ["advertisements"],
+    queryKey: ["advertisements", filters],
     queryFn: async () => {
-      const res = await api.get<AdvertisementsResponse>("/mobcash/ann")
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.enable !== undefined) params.enable = filters.enable
+
+      const res = await api.get<AdvertisementsResponse>("/mobcash/ann", { params })
       return res.data
     },
   })
