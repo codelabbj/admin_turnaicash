@@ -39,14 +39,14 @@ export default function SettingsPage() {
               <CardDescription>Montants minimum et maximum des transactions</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Dépôt Minimum</span>
                 <Badge variant="outline">{settings.minimum_deposit} FCFA</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Retrait Minimum</span>
                 <Badge variant="outline">{settings.minimum_withdrawal} FCFA</Badge>
-              </div>
+              </div> */}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Retrait Minimum Récompense</span>
                 <Badge variant="outline">{settings.reward_mini_withdrawal} FCFA</Badge>

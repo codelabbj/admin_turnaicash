@@ -97,7 +97,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
 
             <TabsContent value="limits" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="minimum_deposit">Dépôt Minimum (FCFA) *</Label>
                   <Input
                     id="minimum_deposit"
@@ -121,7 +121,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                     required
                     disabled={updateSettings.isPending}
                   />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <Label htmlFor="reward_mini_withdrawal">Retrait Minimum Récompense (FCFA) *</Label>

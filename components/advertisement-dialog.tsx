@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import { useCreateAdvertisement, useUpdateAdvertisement, type Advertisement, type AdvertisementInput } from "@/hooks/useAdvertisements"
+import api from "@/lib/axios"
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Loader2, Upload, X } from "lucide-react"
+import { toast } from "react-hot-toast"
 
 interface AdvertisementDialogProps {
   open: boolean
@@ -52,37 +54,47 @@ export function AdvertisementDialog({ open, onOpenChange, advertisement }: Adver
     }
   }, [advertisement])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file")
+      toast.error("Veuillez sélectionner un fichier image")
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB")
+      toast.error("La taille de l'image doit être inférieure à 5MB")
       return
     }
 
     setIsUploading(true)
 
-    // Convert to base64
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64String = reader.result as string
-      setFormData({ ...formData, image: base64String })
-      setPreview(base64String)
+    try {
+      const uploadData = new FormData()
+      uploadData.append("file", file)
+
+      const response = await api.post("/mobcash/upload", uploadData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      const imageUrl = response.data?.file
+      if (!imageUrl) {
+        throw new Error("La réponse de l'API ne contient pas de clé 'file'")
+      }
+
+      setFormData((prev) => ({ ...prev, image: imageUrl }))
+      setPreview(imageUrl)
+      toast.success("Image téléchargée avec succès")
+    } catch (error: any) {
+      toast.error(error?.response?.data?.detail || error?.response?.data?.error || "Erreur lors du téléchargement de l'image")
+    } finally {
       setIsUploading(false)
     }
-    reader.onerror = () => {
-      alert("Error reading file")
-      setIsUploading(false)
-    }
-    reader.readAsDataURL(file)
   }
 
   const handleRemoveImage = () => {
@@ -117,7 +129,7 @@ export function AdvertisementDialog({ open, onOpenChange, advertisement }: Adver
     }
   }
 
-  const isPending = createAdvertisement.isPending || updateAdvertisement.isPending
+  const isPending = createAdvertisement.isPending || updateAdvertisement.isPending || isUploading
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

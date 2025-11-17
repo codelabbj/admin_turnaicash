@@ -168,85 +168,83 @@ export default function DashboardPage() {
       </Card>
 
       {/* Volume Transactions */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Volume des Transactions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Dépôts</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold">
-                  {isLoading ? "…" : formatCurrency(volume?.deposits?.total_amount)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ({formatNumber(volume?.deposits?.total_count)} transactions)
-                </p>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Retraits</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold">
-                  {isLoading ? "…" : formatCurrency(volume?.withdrawals?.total_amount)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ({formatNumber(volume?.withdrawals?.total_count)} transactions)
-                </p>
-              </div>
-            </div>
-            <div className="pt-2 border-t">
-              <p className="text-sm text-muted-foreground">Volume Net</p>
-              <p className="text-2xl font-bold text-primary">
-                {isLoading ? "…" : formatCurrency(volume?.net_volume)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Statistiques Bizao
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Solde Bizao</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Volume des Transactions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Dépôts</p>
+            <div className="flex items-baseline gap-2">
               <p className="text-2xl font-bold">
-                {isLoading ? "…" : formatCurrency(stats?.balance_bizao)}
+                {isLoading ? "…" : formatCurrency(volume?.deposits?.total_amount)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                ({formatNumber(volume?.deposits?.total_count)} transactions)
               </p>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Dépôts Bizao</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-xl font-bold">
-                  {isLoading ? "…" : formatCurrency(stats?.deposits_bizao?.amount)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ({formatNumber(stats?.deposits_bizao?.count)} transactions)
-                </p>
-              </div>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Retraits</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold">
+                {isLoading ? "…" : formatCurrency(volume?.withdrawals?.total_amount)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                ({formatNumber(volume?.withdrawals?.total_count)} transactions)
+              </p>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Retraits Bizao</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-xl font-bold">
-                  {isLoading ? "…" : formatCurrency(stats?.withdrawals_bizao?.amount)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ({formatNumber(stats?.withdrawals_bizao?.count)} transactions)
-                </p>
-              </div>
+          </div>
+          <div className="pt-2 border-t">
+            <p className="text-sm text-muted-foreground">Volume Net</p>
+            <p className="text-2xl font-bold text-primary">
+              {isLoading ? "…" : formatCurrency(volume?.net_volume)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Statistiques Bizao
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Solde Bizao</p>
+            <p className="text-2xl font-bold">
+              {isLoading ? "…" : formatCurrency(stats?.balance_bizao)}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Dépôts Bizao</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-xl font-bold">
+                {isLoading ? "…" : formatCurrency(stats?.deposits_bizao?.amount)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                ({formatNumber(stats?.deposits_bizao?.count)} transactions)
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Retraits Bizao</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-xl font-bold">
+                {isLoading ? "…" : formatCurrency(stats?.withdrawals_bizao?.amount)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                ({formatNumber(stats?.withdrawals_bizao?.count)} transactions)
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card> */}
 
       {/* Transactions by App */}
       <Card>
@@ -358,9 +356,9 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Rewards, Disbursements, Ads & Coupons */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      {/* Ads & Coupons */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Récompenses</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
@@ -371,9 +369,9 @@ export default function DashboardPage() {
             </div>
             <p className="text-xs text-muted-foreground">Total des récompenses</p>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Décaissements</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -388,7 +386,7 @@ export default function DashboardPage() {
                 : `${formatNumber(stats?.disbursements?.count)} décaissements`}
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
