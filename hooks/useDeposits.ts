@@ -4,24 +4,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/lib/axios"
 import { toast } from "react-hot-toast"
 
+interface BetAppInfo {
+  id: string
+  name: string
+  image: string
+  enable: boolean
+  deposit_tuto_link: string | null
+  withdrawal_tuto_link: string | null
+  why_withdrawal_fail: string | null
+  order: number | null
+  city: string | null
+  street: string | null
+  minimun_deposit: number
+  max_deposit: number
+  minimun_with: number
+  max_win: number
+  active_for_deposit?: boolean
+  active_for_with?: boolean
+}
+
 export interface DepositItem {
   id: number
-  bet_app: {
-    id: string
-    name: string
-    image: string
-    enable: boolean
-    deposit_tuto_link: string | null
-    withdrawal_tuto_link: string | null
-    why_withdrawal_fail: string | null
-    order: number | null
-    city: string | null
-    street: string | null
-    minimun_deposit: number
-    max_deposit: number
-    minimun_with: number
-    max_win: number
-  }
+  bet_app?: BetAppInfo | null
+  bet_app_detail?: BetAppInfo | null
   amount: string
   created_at: string
 }
@@ -35,22 +40,7 @@ export interface DepositsResponse {
 
 export interface Caisse {
   id: number
-  bet_app: {
-    id: string
-    name: string
-    image: string
-    enable: boolean
-    deposit_tuto_link: string | null
-    withdrawal_tuto_link: string | null
-    why_withdrawal_fail: string | null
-    order: number | null
-    city: string | null
-    street: string | null
-    minimun_deposit: number
-    max_deposit: number
-    minimun_with: number
-    max_win: number
-  }
+  bet_app: BetAppInfo
   solde: string
   updated_at: string | null
 }

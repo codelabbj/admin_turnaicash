@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useDeposits, useCaisses, type DepositFilters } from "@/hooks/useDeposits"
+import { useDeposits, useCaisses, type DepositFilters, type DepositItem } from "@/hooks/useDeposits"
 import { usePlatforms } from "@/hooks/usePlatforms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,10 @@ export default function DepositsPage() {
   const { data: caisses, isLoading: caissesLoading } = useCaisses()
   const { data: platformsData } = usePlatforms()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
+
+  const getPlatformName = (deposit: DepositItem) => {
+    return deposit.bet_app_detail?.name || deposit.bet_app?.name || "-"
+  }
 
   return (
     <div className="space-y-6">
@@ -141,7 +145,7 @@ export default function DepositsPage() {
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : depositsData && depositsData.results.length > 0 ? (
+              ) : depositsData && depositsData.results && depositsData.results.length > 0 ? (
                 <div className="space-y-4">
                   <Table>
                     <TableHeader>
@@ -156,7 +160,7 @@ export default function DepositsPage() {
                       {depositsData.results.map((deposit) => (
                         <TableRow key={deposit.id}>
                           <TableCell className="font-medium">{deposit.id}</TableCell>
-                          <TableCell>{deposit.bet_app.name}</TableCell>
+                          <TableCell>{getPlatformName(deposit)}</TableCell>
                           <TableCell>
                             <Badge variant="default" className="font-mono">
                               {deposit.amount} FCFA
