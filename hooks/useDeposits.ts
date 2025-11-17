@@ -40,7 +40,8 @@ export interface DepositsResponse {
 
 export interface Caisse {
   id: number
-  bet_app: BetAppInfo
+  bet_app: string // UUID
+  bet_app_details?: BetAppInfo
   solde: string
   updated_at: string | null
 }

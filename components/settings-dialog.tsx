@@ -153,7 +153,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
             <TabsContent value="rewards" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="bonus_percent">Pourcentage de Bonus promo*</Label>
+                  <Label htmlFor="bonus_percent">Pourcentage de parrainage*</Label>
                   <Input
                     id="bonus_percent"
                     type="number"
@@ -166,7 +166,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="deposit_reward_percent">Pourcentage de Récompense de Dépôt promo*</Label>
+                  <Label htmlFor="deposit_reward_percent"> Pourcentage de bonus*</Label>
                   <Input
                     id="deposit_reward_percent"
                     type="number"
@@ -179,7 +179,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="referral_bonus">Bonus de parrainnage de Turanicash </Label>
+                  <Label htmlFor="referral_bonus">Parrainage  </Label>
                   <Switch
                     id="referral_bonus"
                     checked={formData.referral_bonus}
@@ -189,7 +189,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                 </div>
 
                 <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="deposit_reward">Bonus de parrainnage de Turanicash</Label>
+                  <Label htmlFor="deposit_reward">Bonus </Label>
                   <Switch
                     id="deposit_reward"
                     checked={formData.deposit_reward}
