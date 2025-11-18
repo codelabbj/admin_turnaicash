@@ -91,7 +91,14 @@ export default function BonusesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{bonus.reason_bonus}</TableCell>
-                      <TableCell className="font-mono text-xs">{bonus.user}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium text-sm">
+                            {bonus.user?.first_name} {bonus.user?.last_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{bonus.user?.email}</div>
+                        </div>
+                      </TableCell>
                       <TableCell>{bonus.transaction || "-"}</TableCell>
                       <TableCell>{new Date(bonus.created_at).toLocaleDateString()}</TableCell>
                     </TableRow>

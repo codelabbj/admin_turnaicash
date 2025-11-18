@@ -8,8 +8,13 @@ export interface Bonus {
   created_at: string
   amount: string
   reason_bonus: string
-  transaction: string | null
-  user: string
+  transaction: number | null
+  user: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+  }
 }
 
 export interface BonusesResponse {

@@ -24,11 +24,20 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config
 
+    // 🚫 Handle permission errors - redirect to login
+    const errorMessage = error.response?.data?.details || error.response?.data?.detail || error.response?.data?.error || ""
+    if (errorMessage.includes("You do not have permission to perform this action")) {
+      localStorage.clear()
+      document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      window.location.href = "/login"
+      return Promise.reject(error)
+    }
+
     // 🔁 Handle token refresh for 401 errors
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       
-      const errorMessage = error.response?.data?.details || error.response?.data?.detail || error.response?.data?.error || ""
       const isAuthenticationError = 
         errorMessage.includes("Authentication credentials were not provided") ||
         errorMessage.includes("Invalid token") ||
@@ -84,8 +93,9 @@ api.interceptors.response.use(
 
     const backendLang = detectLang(backendMsg)
 
-    // Don't show toast for authentication errors that are being handled
-    if (error.response?.status !== 401 || !original._retry) {
+    // Don't show toast for authentication errors that are being handled or permission errors (redirecting)
+    const isPermissionError = backendMsg.includes("You do not have permission to perform this action")
+    if ((error.response?.status !== 401 || !original._retry) && !isPermissionError) {
       toast.error(backendMsg, {
         style: {
           direction: "ltr",

@@ -45,6 +45,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
     orange_default_link: null,
     mtn_default_link: null,
     telegram: null,
+    moov_marchand_phone: null,
   })
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
         orange_default_link: settings.orange_default_link,
         mtn_default_link: settings.mtn_default_link,
         telegram: settings.telegram,
+        moov_marchand_phone: settings.moov_marchand_phone,
       })
     }
   }, [settings])
@@ -295,6 +297,17 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                     value={formData.telegram || ""}
                     onChange={(e) => setFormData({ ...formData, telegram: e.target.value || null })}
                     placeholder="https://t.me/..."
+                    disabled={updateSettings.isPending}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="moov_marchand_phone">Téléphone Marchand Moov</Label>
+                  <Input
+                    id="moov_marchand_phone"
+                    value={formData.moov_marchand_phone || ""}
+                    onChange={(e) => setFormData({ ...formData, moov_marchand_phone: e.target.value || null })}
+                    placeholder="2250700000000"
                     disabled={updateSettings.isPending}
                   />
                 </div>

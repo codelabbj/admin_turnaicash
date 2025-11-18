@@ -195,6 +195,10 @@ export default function SettingsPage() {
                   <span className="text-sm text-muted-foreground">N/A</span>
                 )}
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Téléphone Marchand Moov (moov_marchand_phone)</span>
+                <Badge variant="outline">{settings.moov_marchand_phone || "N/A"}</Badge>
+              </div>
             </CardContent>
           </Card>
         </div>
