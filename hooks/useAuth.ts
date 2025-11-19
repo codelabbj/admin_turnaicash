@@ -37,8 +37,8 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      // Call logout endpoint if available
-      await api.post("/auth/logout")
+      const refresh = localStorage.getItem("refresh_token")
+      await api.post("/auth/logout", refresh ? { refresh } : undefined)
     },
     onSuccess: () => {
       clearAuthTokens()
