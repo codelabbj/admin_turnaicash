@@ -22,6 +22,8 @@ export interface Platform {
   max_deposit: number
   minimun_with: number
   max_win: number
+  active_for_deposit: boolean
+  active_for_with: boolean
 }
 
 export type PlatformInput = Omit<Platform, "id">
@@ -44,7 +46,7 @@ export function usePlatforms(filters: PlatformFilters = {}) {
   return useQuery({
     queryKey: ["platforms", filters],
     queryFn: async () => {
-      const params: Record<string, string | number> = {}
+      const params: Record<string, string | number | boolean> = {}
       if (filters.page) params.page = filters.page
       if (filters.page_size) params.page_size = filters.page_size
       if (filters.search) params.search = filters.search

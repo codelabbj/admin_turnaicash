@@ -49,6 +49,8 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
     max_deposit: 100000,
     minimun_with: 300,
     max_win: 1000000,
+    active_for_deposit: false,
+    active_for_with: false,
   })
 
   const [preview, setPreview] = useState<string>("")
@@ -75,6 +77,8 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
         max_deposit: 100000,
         minimun_with: 300,
         max_win: 1000000,
+        active_for_deposit: false,
+        active_for_with: false,
       })
       setPreview("")
       if (fileInputRef.current) {
@@ -101,6 +105,8 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
         max_deposit: platform.max_deposit,
         minimun_with: platform.minimun_with,
         max_win: platform.max_win,
+        active_for_deposit: platform.active_for_deposit ?? false,
+        active_for_with: platform.active_for_with ?? false,
       })
       setPreview(platform.image)
     } else {
@@ -121,6 +127,8 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
         max_deposit: 100000,
         minimun_with: 300,
         max_win: 1000000,
+        active_for_deposit: false,
+        active_for_with: false,
       })
       setPreview("")
     }
@@ -229,6 +237,8 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
             max_deposit: 100000,
             minimun_with: 300,
             max_win: 1000000,
+            active_for_deposit: false,
+            active_for_with: false,
           })
           setPreview("")
         },
@@ -453,6 +463,26 @@ export function PlatformDialog({ open, onOpenChange, platform }: PlatformDialogP
                 id="enable"
                 checked={formData.enable}
                 onCheckedChange={(checked) => setFormData({ ...formData, enable: checked })}
+                disabled={isPending}
+              />
+            </div>
+
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor="active_for_deposit">Actif pour Dépôt</Label>
+              <Switch
+                id="active_for_deposit"
+                checked={formData.active_for_deposit}
+                onCheckedChange={(checked) => setFormData({ ...formData, active_for_deposit: checked })}
+                disabled={isPending}
+              />
+            </div>
+
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor="active_for_with">Actif pour Retrait</Label>
+              <Switch
+                id="active_for_with"
+                checked={formData.active_for_with}
+                onCheckedChange={(checked) => setFormData({ ...formData, active_for_with: checked })}
                 disabled={isPending}
               />
             </div>
