@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useBotTransactions, type BotTransaction, type BotTransactionFilters } from "@/hooks/useBotTransactions"
+import { useQueryClient } from "@tanstack/react-query"
+import { useBotTransactions, useCheckBotTransactionStatus, type BotTransaction, type BotTransactionFilters } from "@/hooks/useBotTransactions"
 import { useNetworks } from "@/hooks/useNetworks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Plus, Search, RefreshCw, Copy } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "react-hot-toast"
 import { CreateBotTransactionDialog } from "@/components/create-bot-transaction-dialog"
 import { ChangeBotStatusDialog } from "@/components/change-bot-status-dialog"
@@ -23,14 +32,29 @@ export default function BotTransactionsPage() {
 
   const { data: transactionsData, isLoading } = useBotTransactions(filters)
   const { data: networks } = useNetworks()
+  const queryClient = useQueryClient()
+  const checkStatus = useCheckBotTransactionStatus()
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [statusResponse, setStatusResponse] = useState<{ status: string; message?: string } | null>(null)
   const [selectedTransaction, setSelectedTransaction] = useState<BotTransaction | null>(null)
 
   const handleChangeStatus = (transaction: BotTransaction) => {
     setSelectedTransaction(transaction)
     setStatusDialogOpen(true)
+  }
+
+  const handleCheckStatus = (transaction: BotTransaction) => {
+    checkStatus.mutate(transaction.reference, {
+      onSuccess: (data) => {
+        setStatusResponse({ status: data.status, message: data.message })
+        queryClient.invalidateQueries({ queryKey: ["bot-transactions"] })
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.detail || "Erreur lors de la vérification du statut")
+      }
+    })
   }
 
   const getStatusColor = (status: string) => {
@@ -322,10 +346,27 @@ export default function BotTransactionsPage() {
                       </TableCell>
                       <TableCell>{new Date(transaction.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={() => handleChangeStatus(transaction)}>
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          Changer Statut
-                        </Button>
+                        <div className="flex gap-2 justify-end">
+                          {(transaction.status === "pending" || transaction.status === "error" || transaction.status === "init_payment") && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCheckStatus(transaction)}
+                              disabled={checkStatus.isPending}
+                              title="Vérifier le statut"
+                            >
+                              {checkStatus.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => handleChangeStatus(transaction)}>
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Changer Statut
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -368,6 +409,35 @@ export default function BotTransactionsPage() {
         onOpenChange={setStatusDialogOpen}
         transaction={selectedTransaction}
       />
+
+
+      <Dialog open={!!statusResponse} onOpenChange={() => setStatusResponse(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Résultat de la vérification</DialogTitle>
+            <DialogDescription>
+              Statut de la transaction bot vérifié avec succès
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2">
+              <div>
+                <strong>Statut:</strong> <Badge variant={getStatusColor(statusResponse?.status || "")}>
+                  {getStatusLabel(statusResponse?.status || "")}
+                </Badge>
+              </div>
+              {statusResponse?.message && (
+                <div>
+                  <strong>Message:</strong> {statusResponse.message}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setStatusResponse(null)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useTransactions, type Transaction, type TransactionFilters } from "@/hooks/useTransactions"
+import { useQueryClient } from "@tanstack/react-query"
+import { useTransactions, useCheckTransactionStatus, useChangeTransactionStatus, type Transaction, type TransactionFilters } from "@/hooks/useTransactions"
 import { useNetworks } from "@/hooks/useNetworks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,10 +11,18 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Plus, Search, RefreshCw, Copy } from "lucide-react"
+import { Loader2, Plus, Search, Copy, RefreshCw } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { CreateTransactionDialog } from "@/components/create-transaction-dialog"
-import { ChangeStatusDialog } from "@/components/change-status-dialog"
+import { ChangeTransactionStatusDialog } from "@/components/change-transaction-status-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export default function TransactionsPage() {
   const [filters, setFilters] = useState<TransactionFilters>({
@@ -23,31 +32,44 @@ export default function TransactionsPage() {
 
   const { data: transactionsData, isLoading } = useTransactions(filters)
   const { data: networks } = useNetworks()
+  const queryClient = useQueryClient()
+  const checkStatus = useCheckTransactionStatus()
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [changeStatusDialogOpen, setChangeStatusDialogOpen] = useState(false)
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [statusResponse, setStatusResponse] = useState<{ status: string; message?: string } | null>(null)
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+
+  const handleCheckStatus = (transaction: Transaction) => {
+    checkStatus.mutate(transaction.reference, {
+      onSuccess: (data) => {
+        setStatusResponse({ status: data.status, message: data.message })
+        setStatusDialogOpen(true)
+        queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.detail || "Erreur lors de la vérification du statut")
+      }
+    })
+  }
 
   const handleChangeStatus = (transaction: Transaction) => {
     setSelectedTransaction(transaction)
-    setStatusDialogOpen(true)
+    setChangeStatusDialogOpen(true)
   }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "accept":
       case "success":
         return "default" // Green (success)
-      case "reject":
-      case "fail":
       case "failed":
+      case "error":
         return "destructive" // Red (error)
       case "pending":
         return "secondary" // Gray/neutral
       case "init_payment":
         return "outline" // Processing
-      case "timeout":
-        return "outline" // Border only
       default:
         return "secondary" // Default fallback
     }
@@ -55,19 +77,15 @@ export default function TransactionsPage() {
 
   const getStatusLabel = (status: string): string => {
     switch (status.toLowerCase()) {
-      case "accept":
       case "success":
-        return "Accepté"
-      case "reject":
-      case "fail":
+        return "Succès"
       case "failed":
-        return "Rejeté"
+      case "error":
+        return "Erreur"
       case "pending":
         return "En attente"
       case "init_payment":
         return "En traitement"
-      case "timeout":
-        return "Expiré"
       default:
         return status
     }
@@ -79,8 +97,6 @@ export default function TransactionsPage() {
         return "Dépôt"
       case "withdrawal":
         return "Retrait"
-      case "reward":
-        return "Récompense"
       default:
         return type
     }
@@ -92,8 +108,6 @@ export default function TransactionsPage() {
         return "default" // Green/primary
       case "withdrawal":
         return "secondary" // Gray
-      case "reward":
-        return "outline" // Border
       default:
         return "secondary"
     }
@@ -124,7 +138,7 @@ export default function TransactionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
-          <p className="text-muted-foreground">Gérez les dépôts et retraits</p>
+          <p className="text-muted-foreground">Gérez les dépôts et retraits des utilisateurs</p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -138,14 +152,14 @@ export default function TransactionsPage() {
           <CardDescription>Rechercher et filtrer les transactions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Rechercher Référence</Label>
+              <Label htmlFor="search">Rechercher</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Rechercher par référence..."
+                  placeholder="Rechercher par référence ou téléphone..."
                   value={filters.search || ""}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined })}
                   className="pl-8"
@@ -157,7 +171,7 @@ export default function TransactionsPage() {
               <Label htmlFor="type">Type de Transaction</Label>
               <Select
                 value={filters.type_trans || "all"}
-                onValueChange={(value) => setFilters({ ...filters, type_trans: value === "all" ? undefined : value })}
+                onValueChange={(value) => setFilters({ ...filters, type_trans: value === "all" ? undefined : value as "deposit" | "withdrawal" })}
               >
                 <SelectTrigger id="type">
                   <SelectValue />
@@ -181,10 +195,10 @@ export default function TransactionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les Statuts</SelectItem>
+                  <SelectItem value="init_payment">En traitement</SelectItem>
                   <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="accept">Accepté</SelectItem>
-                  <SelectItem value="reject">Rejeté</SelectItem>
-                  <SelectItem value="timeout">Expiré</SelectItem>
+                  <SelectItem value="success">Succès</SelectItem>
+                  <SelectItem value="failed">Erreur</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,7 +207,7 @@ export default function TransactionsPage() {
               <Label htmlFor="source">Source</Label>
               <Select
                 value={filters.source || "all"}
-                onValueChange={(value) => setFilters({ ...filters, source: value === "all" ? undefined : value })}
+                onValueChange={(value) => setFilters({ ...filters, source: value === "all" ? undefined : value as "web" | "mobile" })}
               >
                 <SelectTrigger id="source">
                   <SelectValue />
@@ -202,28 +216,6 @@ export default function TransactionsPage() {
                   <SelectItem value="all">Toutes les Sources</SelectItem>
                   <SelectItem value="web">Web</SelectItem>
                   <SelectItem value="mobile">Mobile</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="network">Réseau</Label>
-              <Select
-                value={filters.network?.toString() || "all"}
-                onValueChange={(value) =>
-                  setFilters({ ...filters, network: value === "all" ? undefined : Number.parseInt(value) })
-                }
-              >
-                <SelectTrigger id="network">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les Réseaux</SelectItem>
-                  {(networks?.results || []).map((network) => (
-                    <SelectItem key={network.id} value={network.id.toString()}>
-                      {network.public_name}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -247,8 +239,7 @@ export default function TransactionsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Référence</TableHead>
-                    <TableHead>ID Pari</TableHead>
-                    <TableHead>Application</TableHead>
+                    <TableHead>ID Utilisateur</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Téléphone</TableHead>
@@ -260,8 +251,11 @@ export default function TransactionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactionsData.results.map((transaction) => (
-                    <TableRow key={transaction.id}>
+                  {transactionsData.results.map((transaction) => {
+                    const statusLower = transaction.status?.toLowerCase()
+                    const shouldShow = statusLower === "pending" || statusLower === "failed" || statusLower === "init_payment" || statusLower === "error"
+                    return (
+                      <TableRow key={transaction.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs">{displayValue(transaction.reference)}</span>
@@ -284,15 +278,14 @@ export default function TransactionsPage() {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={() => handleCopy(transaction.user_app_id!)}
-                              title="Copier l'ID pari"
+                              onClick={() => handleCopy(transaction.user_app_id)}
+                              title="Copier l'ID utilisateur"
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{displayValue(transaction.app_details?.name)}</TableCell>
                       <TableCell>
                         <Badge variant={getTypeTransColor(transaction.type_trans)}>
                           {getTypeTransLabel(transaction.type_trans)}
@@ -315,13 +308,31 @@ export default function TransactionsPage() {
                       </TableCell>
                       <TableCell>{new Date(transaction.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={() => handleChangeStatus(transaction)}>
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          Changer Statut
-                        </Button>
+                        <div className="flex gap-2 justify-end">
+                          {shouldShow && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCheckStatus(transaction)}
+                              disabled={checkStatus.isPending}
+                              title="Vérifier le statut"
+                            >
+                              {checkStatus.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" onClick={() => handleChangeStatus(transaction)}>
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Changer Statut
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    )
+                  })}
                 </TableBody>
               </Table>
 
@@ -350,17 +361,48 @@ export default function TransactionsPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">Aucune transaction trouvée</div>
+            <div className="text-center py-8 text-muted-foreground">
+              Aucune transaction trouvée
+            </div>
           )}
         </CardContent>
       </Card>
 
       <CreateTransactionDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
-      <ChangeStatusDialog
-        open={statusDialogOpen}
-        onOpenChange={setStatusDialogOpen}
+      <ChangeTransactionStatusDialog
+        open={changeStatusDialogOpen}
+        onOpenChange={setChangeStatusDialogOpen}
         transaction={selectedTransaction}
       />
+
+
+      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Résultat de la vérification</DialogTitle>
+            <DialogDescription>
+              Statut de la transaction vérifié avec succès
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2">
+              <div>
+                <strong>Statut:</strong> <Badge variant={getStatusColor(statusResponse?.status || "")}>
+                  {getStatusLabel(statusResponse?.status || "")}
+                </Badge>
+              </div>
+              {statusResponse?.message && (
+                <div>
+                  <strong>Message:</strong> {statusResponse.message}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setStatusDialogOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

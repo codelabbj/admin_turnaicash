@@ -4,64 +4,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/lib/axios"
 import { toast } from "react-hot-toast"
 
-export interface TransactionUser {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-}
-
-export interface AppDetails {
-  id: string
-  name: string
-  image: string
-  enable: boolean
-  deposit_tuto_link: string | null
-  withdrawal_tuto_link: string | null
-  why_withdrawal_fail: string | null
-  order: number | null
-  city: string | null
-  street: string | null
-  minimun_deposit: number
-  max_deposit: number
-  minimun_with: number
-  max_win: number
-  active_for_deposit: boolean
-  active_for_with: boolean
-}
-
 export interface Transaction {
   id: number
-  user: TransactionUser
-  app_details: AppDetails | null
   amount: number
-  deposit_reward_amount: number | null
-  reference: string
-  type_trans: "deposit" | "withdrawal" | "reward"
-  status: string
-  created_at: string
-  validated_at: string | null
-  webhook_data: any
-  wehook_receive_at: string | null
-  phone_number: string | null
-  user_app_id: string | null
-  withdriwal_code: string | null
-  error_message: string | null
-  transaction_link: string | null
-  net_payable_amout: number | null
-  otp_code: string | null
-  public_id: string | null
-  already_process: boolean
-  source: "mobile" | "web" | null
-  old_status: string
-  old_public_id: string
-  success_webhook_send: boolean
-  fail_webhook_send: boolean
-  pending_webhook_send: boolean
-  timeout_webhook_send: boolean
-  telegram_user: number | null
+  phone_number: string
   app: string
-  network: number | null
+  user_app_id: string
+  network: number
+  source: "web" | "mobile"
+  type_trans: "deposit" | "withdrawal"
+  status: "pending" | "success" | "failed" | "init_payment"
+  reference: string
+  created_at: string
+  validated_at?: string
+  error_message?: string
 }
 
 export interface TransactionsResponse {
@@ -74,12 +30,30 @@ export interface TransactionsResponse {
 export interface TransactionFilters {
   page?: number
   page_size?: number
-  user?: string
-  type_trans?: string
+  type_trans?: "deposit" | "withdrawal"
   status?: string
-  source?: string
-  network?: number
   search?: string
+  app?: string
+  source?: "web" | "mobile"
+}
+
+export function useTransactions(filters: TransactionFilters = {}) {
+  return useQuery({
+    queryKey: ["transactions", filters],
+    queryFn: async () => {
+      const params: Record<string, string | number> = {}
+      if (filters.page) params.page = filters.page
+      if (filters.page_size) params.page_size = filters.page_size
+      if (filters.type_trans) params.type_trans = filters.type_trans
+      if (filters.status) params.status = filters.status
+      if (filters.search) params.search = filters.search
+      if (filters.app) params.app = filters.app
+      if (filters.source) params.source = filters.source
+
+      const res = await api.get<TransactionsResponse>("/mobcash/transaction-history", { params })
+      return res.data
+    },
+  })
 }
 
 export interface CreateDepositInput {
@@ -101,32 +75,21 @@ export interface CreateWithdrawalInput {
   source: "web" | "mobile"
 }
 
-export interface ChangeStatusInput {
-  status: "accept" | "reject" | "pending"
-  reference: string
-}
-
-export function useTransactions(filters: TransactionFilters = {}) {
-  return useQuery({
-    queryKey: ["transactions", filters],
-    queryFn: async () => {
-      const res = await api.get<TransactionsResponse>("/mobcash/transaction-history", { params: filters })
-      return res.data
-    },
-  })
-}
-
 export function useCreateDeposit() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (data: CreateDepositInput) => {
-      const res = await api.post<Transaction>("/mobcash/transaction-deposit", data)
+      const res = await api.post<Transaction>("/mobcash/create-deposit", data)
       return res.data
     },
     onSuccess: () => {
-      toast.success("Deposit transaction created successfully!")
+      toast.success("Dépôt créé avec succès!")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      queryClient.invalidateQueries({ queryKey: ["deposits"] })
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.detail || "Erreur lors de la création du dépôt")
     },
   })
 }
@@ -136,12 +99,36 @@ export function useCreateWithdrawal() {
 
   return useMutation({
     mutationFn: async (data: CreateWithdrawalInput) => {
-      const res = await api.post<Transaction>("/mobcash/transaction-withdrawal", data)
+      const res = await api.post<Transaction>("/mobcash/create-withdrawal", data)
       return res.data
     },
     onSuccess: () => {
-      toast.success("Withdrawal transaction created successfully!")
+      toast.success("Retrait créé avec succès!")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      queryClient.invalidateQueries({ queryKey: ["deposits"] })
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.detail || "Erreur lors de la création du retrait")
+    },
+  })
+}
+
+export interface TransactionStatusResponse {
+  status: string
+  message?: string
+  transaction?: Transaction
+}
+
+export interface ChangeTransactionStatusInput {
+  status?: "pending" | "success" | "failed" | "init_payment"
+  reference: string
+}
+
+export function useCheckTransactionStatus() {
+  return useMutation({
+    mutationFn: async (reference: string) => {
+      const res = await api.get<TransactionStatusResponse>(`/mobcash/show-transaction-status?reference=${reference}`)
+      return res.data
     },
   })
 }
@@ -150,12 +137,12 @@ export function useChangeTransactionStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: ChangeStatusInput) => {
+    mutationFn: async (data: ChangeTransactionStatusInput) => {
       const res = await api.post("/mobcash/change-transaction", data)
       return res.data
     },
     onSuccess: () => {
-      toast.success("Transaction status updated successfully!")
+      toast.success("Statut de la transaction mis à jour avec succès!")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
     },
   })

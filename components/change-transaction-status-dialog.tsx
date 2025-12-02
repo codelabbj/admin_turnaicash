@@ -1,6 +1,6 @@
 "use client"
 
-import { useChangeBotTransactionStatus, type BotTransaction } from "@/hooks/useBotTransactions"
+import { useChangeTransactionStatus, type Transaction } from "@/hooks/useTransactions"
 import {
   Dialog,
   DialogContent,
@@ -12,14 +12,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 
-interface ChangeBotStatusDialogProps {
+interface ChangeTransactionStatusDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  transaction: BotTransaction | null
+  transaction: Transaction | null
 }
 
-export function ChangeBotStatusDialog({ open, onOpenChange, transaction }: ChangeBotStatusDialogProps) {
-  const changeStatus = useChangeBotTransactionStatus()
+export function ChangeTransactionStatusDialog({ open, onOpenChange, transaction }: ChangeTransactionStatusDialogProps) {
+  const changeStatus = useChangeTransactionStatus()
 
   const handleConfirm = () => {
     if (!transaction) return
@@ -38,9 +38,9 @@ export function ChangeBotStatusDialog({ open, onOpenChange, transaction }: Chang
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Changer le Statut de Bot Transaction</DialogTitle>
+          <DialogTitle>Changer le Statut de Transaction</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir changer le statut de cette transaction bot ?
+            Êtes-vous sûr de vouloir changer le statut de cette transaction ?
             <br />
             <strong>Référence:</strong> {transaction?.reference}
             <br />

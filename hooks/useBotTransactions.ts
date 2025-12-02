@@ -82,8 +82,14 @@ export interface CreateBotWithdrawalInput {
 }
 
 export interface ChangeBotStatusInput {
-  status: "init_payment" | "accept" | "error" | "pending"
+  status?: "init_payment" | "accept" | "error" | "pending"
   reference: string
+}
+
+export interface BotTransactionStatusResponse {
+  status: string
+  message?: string
+  transaction?: BotTransaction
 }
 
 export function useBotTransactions(filters: BotTransactionFilters = {}) {
@@ -137,6 +143,15 @@ export function useChangeBotTransactionStatus() {
     onSuccess: () => {
       toast.success("Bot transaction status updated successfully!")
       queryClient.invalidateQueries({ queryKey: ["bot-transactions"] })
+    },
+  })
+}
+
+export function useCheckBotTransactionStatus() {
+  return useMutation({
+    mutationFn: async (reference: string) => {
+      const res = await api.get<BotTransactionStatusResponse>(`/mobcash/show-transaction-status?reference=${reference}`)
+      return res.data
     },
   })
 }
