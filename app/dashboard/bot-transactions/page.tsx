@@ -356,9 +356,15 @@ export default function BotTransactionsPage() {
                               title="Vérifier le statut"
                             >
                               {checkStatus.isPending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  Vérification...
+                                </>
                               ) : (
-                                <RefreshCw className="h-4 w-4" />
+                                <>
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Vérifier le statut
+                                </>
                               )}
                             </Button>
                           )}
