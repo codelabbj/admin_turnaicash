@@ -295,10 +295,10 @@ export function SettingsDialog({ open, onOpenChange, settings }: SettingsDialogP
                   <Label htmlFor="telegram">Telegram</Label>
                   <Input
                     id="telegram"
-                    type="url"
+                    type="text"
                     value={formData.telegram || ""}
                     onChange={(e) => setFormData({ ...formData, telegram: e.target.value || null })}
-                    placeholder="https://t.me/..."
+                    placeholder="nom_utilisateur"
                     disabled={updateSettings.isPending}
                   />
                 </div>
