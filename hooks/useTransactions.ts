@@ -4,10 +4,30 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/lib/axios"
 import { toast } from "react-hot-toast"
 
+export interface TransactionAppDetails {
+  id: string
+  name: string
+  image: string | null
+  enable: boolean
+  deposit_tuto_link: string | null
+  withdrawal_tuto_link: string | null
+  why_withdrawal_fail: string | null
+  order: number | null
+  city: string | null
+  street: string | null
+  minimun_deposit: number
+  max_deposit: number
+  minimun_with: number
+  max_win: number
+  active_for_deposit: boolean
+  active_for_with: boolean
+}
+
 export interface Transaction {
   id: number
   amount: number
   phone_number: string
+  app_details: TransactionAppDetails | null
   app: string
   user_app_id: string
   network: number

@@ -11,9 +11,29 @@ export interface BotTransactionUser {
   email: string
 }
 
+export interface BotTransactionAppDetails {
+  id: string
+  name: string
+  image: string | null
+  enable: boolean
+  deposit_tuto_link: string | null
+  withdrawal_tuto_link: string | null
+  why_withdrawal_fail: string | null
+  order: number | null
+  city: string | null
+  street: string | null
+  minimun_deposit: number
+  max_deposit: number
+  minimun_with: number
+  max_win: number
+  active_for_deposit: boolean
+  active_for_with: boolean
+}
+
 export interface BotTransaction {
   id: number
   user: BotTransactionUser
+  app_details: BotTransactionAppDetails | null
   amount: number
   deposit_reward_amount: number | null
   reference: string

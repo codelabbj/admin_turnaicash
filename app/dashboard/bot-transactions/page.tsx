@@ -281,6 +281,7 @@ export default function BotTransactionsPage() {
                   <TableRow>
                     <TableHead>Référence</TableHead>
                     <TableHead>ID Pari</TableHead>
+                    <TableHead>App</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Téléphone</TableHead>
@@ -323,6 +324,9 @@ export default function BotTransactionsPage() {
                             </Button>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {transaction.app_details?.name || displayValue(transaction.app)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getTypeTransColor(transaction.type_trans || "")}>
