@@ -30,8 +30,8 @@ api.interceptors.response.use(
     const original = error.config
 
     // 🚫 Handle permission errors - redirect to login
-    const errorMessage = error.response?.data?.details || error.response?.data?.detail || error.response?.data?.error || ""
-    if (errorMessage.includes("You do not have permission to perform this action")) {
+    const permissionErrorMsg = error.response?.data?.details || error.response?.data?.detail || error.response?.data?.error || ""
+    if (permissionErrorMsg.includes("You do not have permission to perform this action")) {
       localStorage.clear()
       document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
@@ -73,26 +73,33 @@ api.interceptors.response.use(
       }
     }
 
-    // 🌍 Smart language-aware error display
-    const userLang = navigator.language.startsWith("fr") ? "fr" : "en"
-    const fallback =
-      userLang === "fr"
-        ? "Une erreur est survenue. Veuillez réessayer."
-        : "An unexpected error occurred. Please try again."
+    // 🌍 Smart language-aware error display with specific status code handling
+    let errorMessage = ""
 
-    const backendMsg =
-      error.response?.data?.details ||
-      error.response?.data?.detail ||
-      error.response?.data?.error ||
-      error.response?.data?.message ||
-      (typeof error.response?.data === "string" ? error.response.data : fallback)
+    // Handle specific status codes with default French messages
+    if (error.response?.status >= 500) {
+      errorMessage = "Erreur serveur interne. Veuillez réessayer plus tard."
+    } else if (error.response?.status === 404) {
+      errorMessage = "Ressource non trouvée."
+    } else if (error.response?.status) {
+      // For other status codes, try to get backend message
+      errorMessage =
+        error.response?.data?.details ||
+        error.response?.data?.detail ||
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        (typeof error.response?.data === "string" ? error.response.data : "")
+    }
 
-    const backendLang = detectLang(backendMsg)
+    // If no specific message was set (unrecognized error), use default
+    if (!errorMessage) {
+      errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer."
+    }
 
     // Don't show toast for authentication errors that are being handled or permission errors (redirecting)
-    const isPermissionError = backendMsg.includes("You do not have permission to perform this action")
+    const isPermissionError = errorMessage.includes("You do not have permission to perform this action")
     if ((error.response?.status !== 401 || !original._retry) && !isPermissionError) {
-      toast.error(backendMsg, {
+      toast.error(errorMessage, {
         style: {
           direction: "ltr",
           fontFamily: "sans-serif",
