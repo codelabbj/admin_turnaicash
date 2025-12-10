@@ -12,14 +12,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { LogOut, User, Moon, Sun } from "lucide-react"
+import { LogOut, User, Moon, Sun, Menu } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { DashboardNav } from "@/components/dashboard-nav"
 
 export function DashboardHeader() {
   const logout = useLogout()
   const { theme, setTheme } = useTheme()
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setUserData(getUserData())
@@ -32,9 +35,26 @@ export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-6">
-        <div>
-          <h1 className="text-xl font-bold">TURAINCASH Admin</h1>
-          <p className="text-sm text-muted-foreground">Gérez votre plateforme</p>
+        <div className="flex items-center gap-4">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-0">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold mb-4">Navigation</h2>
+                <DashboardNav />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <div>
+            <h1 className="text-xl font-bold">TURAINCASH Admin</h1>
+            <p className="text-sm text-muted-foreground">Gérez votre plateforme</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
